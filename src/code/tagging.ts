@@ -23,3 +23,7 @@ export default function getTaggedNodes(
     searchNodes.forEach(recursivelyFindNodes);
     return taggedNodes;
 }
+
+export function getNodeTag(node: SceneNode): string | null {
+    return node.getSharedPluginData("fractyl", "dynamic") || null;
+}

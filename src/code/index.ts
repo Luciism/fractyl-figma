@@ -1,14 +1,32 @@
 import exportDynamicFragments from "./export/dynamic.ts";
 import exportRasterizedStaticElements from "./export/static.ts";
-import getTaggedNodes from "./tagging.ts";
+import { getNodeId, setNodeId } from "./ids.ts";
+import getTaggedNodes, { getNodeTag } from "./tagging.ts";
 
-figma.showUI(__html__, { width: 400, height: 500  });
+figma.showUI(__html__, { width: 400, height: 500 });
 
+figma.currentPage.selection
+figma.on("selectionchange", () => {
+    const node = figma.currentPage.selection[0];
+    if (!node) {
+        return;
+    }
+
+    const nodeId = getNodeId(node);
+    const nodeTag = getNodeTag(node);
+
+    figma.ui.postMessage({
+        type: "selection-changed",
+        selectedNodeId: nodeId,
+        selectedNodeTag: nodeTag,
+    });
+});
 
 figma.ui.onmessage = (msg: {
     type: string;
     tag: string;
     restrictTo?: string;
+    selectionId?: string;
 }) => {
     if (msg.type === "tag-selection") {
         const items = figma.currentPage.selection;
@@ -48,8 +66,16 @@ figma.ui.onmessage = (msg: {
         figma.currentPage.selection.forEach(async node => {
             await exportDynamicFragments(node);
         })
-
     }
 
-    figma.ui.postMessage({type: "done"});
+    else if (msg.type === "set-selection-id") {
+        const id = msg.selectionId;
+        if (id) {
+            figma.currentPage.selection.forEach(node => {
+                setNodeId(node, id);
+            })
+        }
+    }
+
+    figma.ui.postMessage({ type: "done" });
 };

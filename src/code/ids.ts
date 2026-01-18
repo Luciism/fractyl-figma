@@ -24,3 +24,8 @@ export function getNodeWithId(parentNode: SceneNode, id: string): SceneNode | nu
     
     return null;
 }
+
+export function getNodeId(node: SceneNode): string | null {
+    const nodeId = node.getSharedPluginData("fractyl", "id");
+    return nodeId || null;
+}
