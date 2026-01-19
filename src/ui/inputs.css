@@ -1,0 +1,74 @@
+form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 2px;
+
+  label {
+    font-size: 12px;
+
+    margin-bottom: 4px;
+
+    &:not(:first-child) {
+      margin-top: 12px;
+    }
+  }
+
+  input,
+  button,
+  select {
+    border-radius: 4px;
+    background-color: #2e2e2e;
+    height: 32px;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    /* margin: 2px; */
+    width: 100%;
+
+    &:hover {
+      background-color: #333333;
+    }
+  }
+
+  button:hover, select:hover {
+    cursor: pointer;
+  }
+
+  input[type="text"]:hover {
+    cursor: text;
+  }
+
+  button.danger {
+    background-color: red;
+    color: white;
+  }
+
+
+  button {
+    padding-inline: 40px;
+  }
+
+  select {
+    padding-inline: 6px 40px;
+  }
+
+  input[type="text"] {
+    padding-inline: 10px;
+  }
+
+  button[type="submit"] {
+    margin-top: auto;
+  }
+
+
+  & .feedback-msg {
+    font-size: 14px;
+    color: var(--accent-color);
+    width: 100%;
+    text-align: center;
+
+    &.error {
+      color: #ef3232
+    }
+  }
+}
