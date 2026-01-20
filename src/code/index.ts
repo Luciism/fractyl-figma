@@ -1,32 +1,22 @@
 import exportDynamicFragments from "./export/dynamic.ts";
 import exportRasterizedStaticElements from "./export/static.ts";
-import { getNodeId, setNodeId } from "./ids.ts";
-import getTaggedNodes, { getNodeTag } from "./tagging.ts";
+import { setNodeId } from "./ids.ts";
+import getTaggedNodes, { setNodeTag } from "./tagging.ts";
+import "./selection.ts";
+import { isShapeNode } from "./nodes.ts";
+import { FractylShapeNodeData } from "../shared/types.ts";
+import { setShapeHeightMode, setShapeWidthMode } from "./shapes.ts";
 
 figma.showUI(__html__, { width: 400, height: 500 });
 
-figma.currentPage.selection
-figma.on("selectionchange", () => {
-    const node = figma.currentPage.selection[0];
-    if (!node) {
-        return;
-    }
 
-    const nodeId = getNodeId(node);
-    const nodeTag = getNodeTag(node);
-
-    figma.ui.postMessage({
-        type: "selection-changed",
-        selectedNodeId: nodeId,
-        selectedNodeTag: nodeTag,
-    });
-});
 
 figma.ui.onmessage = (msg: {
     type: string;
     tag: string;
     restrictTo?: string;
     selectionId?: string;
+    shapeNodeData?: FractylShapeNodeData
 }) => {
     if (msg.type === "tag-selection") {
         const items = figma.currentPage.selection;
@@ -73,6 +63,20 @@ figma.ui.onmessage = (msg: {
         if (id) {
             figma.currentPage.selection.forEach(node => {
                 setNodeId(node, id);
+            })
+        }
+    }
+
+    else if (msg.type === "update-selection-shape-data") {
+        const shapeNodeData = msg.shapeNodeData;
+        if (shapeNodeData !== undefined) {
+            figma.currentPage.selection.forEach(node => {
+                if (isShapeNode(node)) {
+                    setNodeId(node, shapeNodeData.id);
+                    setNodeTag(node, "shape");
+                    setShapeWidthMode(node, shapeNodeData.attributes.widthMode);
+                    setShapeHeightMode(node, shapeNodeData.attributes.heightMode);
+                }
             })
         }
     }

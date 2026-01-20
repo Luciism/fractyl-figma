@@ -24,13 +24,10 @@ export default function exportImageFragments(masterNode: SceneNode, rectNodes: R
                             y="${masterRelativeY}"
                             width="${node.width}"
                             height="${node.height}"
-                            xlink:href="{${nodeId}}"
+                            xlink:href="{${nodeId}#href}"
                         />`
                     )
                 }
-
-                // node.fills = [{type: "SOLID", color: {r: 0, g: 0, b: 0}}];
-                // console.log(await node.exportAsync({format: "SVG"}));
             }
         }
     })

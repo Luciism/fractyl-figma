@@ -1,4 +1,5 @@
 import "./style.css";
+import "./inputs.css";
 import { TabNav, TabButton } from "./components/Tabs";
 import ReactDOM from "react-dom/client";
 import TaggingTab from "./tabs/tagging";
@@ -6,8 +7,14 @@ import ExportingTab from "./tabs/exporting";
 import IdManagementTab from "./tabs/ids";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
+import ShapesTab from "./tabs/shape";
 
 const tabs = [
+  {
+    id: "shape",
+    button: "Shapes",
+    Component: ShapesTab,
+  },
   {
     id: "element-tagging",
     button: "Tagging",
@@ -23,6 +30,7 @@ const tabs = [
     button: "IDs",
     Component: IdManagementTab,
   },
+
 ];
 
 function App() {
@@ -52,6 +60,7 @@ function App() {
             id={tab.id}
             text={tab.button}
             key={tab.id}
+            activeTabId={activeTabId}
             onClick={() => setActiveTabId(tab.id)}
           />
         ))}

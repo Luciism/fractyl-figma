@@ -1,12 +1,7 @@
 import { isParentNode } from "./nodes";
 
-export function setNodeId(node: SceneNode, id: string) {
-    // Disallow duplicates
-    // if (masterNode !== undefined && getNodeWithId(masterNode, id)) {
-    //     return;
-    // }
-
-    node.setSharedPluginData("fractyl", "id", id);
+export function setNodeId(node: SceneNode, id: string | null) {
+    node.setSharedPluginData("fractyl", "id", id || "");
 }
 
 export function getNodeWithId(parentNode: SceneNode, id: string): SceneNode | null {

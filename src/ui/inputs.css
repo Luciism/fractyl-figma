@@ -58,6 +58,7 @@ form {
 
   button[type="submit"] {
     margin-top: auto;
+    background-color: var(--accent-color);
   }
 
 

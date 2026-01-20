@@ -45,3 +45,12 @@ export function isFillableNode(node: SceneNode) {
     node.type === "STICKY" 
   ) 
 }
+
+export function isShapeNode(node: SceneNode) {
+  return (
+    node.type === "RECTANGLE" ||
+    node.type === "ELLIPSE" ||
+    node.type === "POLYGON" ||
+    node.type === "STAR" 
+  ) 
+}

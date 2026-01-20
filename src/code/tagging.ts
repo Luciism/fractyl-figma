@@ -1,3 +1,4 @@
+import { isNodeTagType, NodeTagType } from "../shared/types";
 import { isParentNode } from "./nodes";
 
 export default function getTaggedNodes(
@@ -24,6 +25,11 @@ export default function getTaggedNodes(
     return taggedNodes;
 }
 
-export function getNodeTag(node: SceneNode): string | null {
-    return node.getSharedPluginData("fractyl", "dynamic") || null;
+export function getNodeTag(node: SceneNode): NodeTagType | null {
+    const tag = node.getSharedPluginData("fractyl", "dynamic");
+    return isNodeTagType(tag) ? tag : null;
+}
+
+export function setNodeTag(node: SceneNode, tag: NodeTagType | null) {
+    node.setSharedPluginData("fractyl", "dynamic", tag || "");
 }

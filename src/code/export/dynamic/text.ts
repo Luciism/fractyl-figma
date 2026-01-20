@@ -105,7 +105,7 @@ function buildSegmentedTextSvgElement(masterNode: SceneNode, textNode: TextNode)
                 font-weight="${segment.fontWeight}"
                 font-family="${segment.fontName.family}, ${FALLBACKFONTFAMILY}"
             >
-                {${nodeId || segment.characters}#${i}}
+                {${nodeId}#text.${i}}
             </tspan>`)
         .join("\n")}
         </text>
@@ -136,7 +136,7 @@ export function buildTextSvgElement(masterNode: SceneNode, textNode: TextNode) {
             font-size="${textNode.fontSize}"
             fill="${fillsToSvgColor(textNode.fills)}"
         >
-            {${nodeId || textNode.characters}}
+            {${nodeId}#text}
         </text>
     `;
 }
