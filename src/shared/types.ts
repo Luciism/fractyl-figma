@@ -1,11 +1,11 @@
-export const shapeDimensionModeValues = ["fixed", "dynamic"] as const;
-export type ShapeDimensionMode = typeof shapeDimensionModeValues[number];
+export const modeAttributeValues = ["fixed", "dynamic"] as const;
+export type ModeAttribute = typeof modeAttributeValues[number];
 
-export function isShapeDimensionMode(
+export function isModeAttribute(
   value: string
-): value is ShapeDimensionMode {
-  return shapeDimensionModeValues.includes(
-    value as ShapeDimensionMode
+): value is ModeAttribute {
+  return modeAttributeValues.includes(
+    value as ModeAttribute
   );
 }
 
@@ -21,10 +21,14 @@ export function isNodeTagType(
 }
 
 
+export type FractylTextNodeDataAttributes = {
+    colorMode: ModeAttribute;
+};
+
 export type FractylTextNodeData = {
   id: string | null;
   tag: "text";
-  attributes: null;
+  attributes: FractylTextNodeDataAttributes;
 };
 
 export type FractylImageNodeData = {
@@ -34,8 +38,9 @@ export type FractylImageNodeData = {
 };
 
 export type FractylShapeNodeDataAttributes = {
-    widthMode: ShapeDimensionMode;
-    heightMode: ShapeDimensionMode;
+    widthMode: ModeAttribute;
+    heightMode: ModeAttribute;
+    colorMode: ModeAttribute;
 };
 
 export type FractylShapeNodeData = {
@@ -56,3 +61,8 @@ export type NodePluginData =
   | FractylShapeNodeData
   | FractylUntaggedNodeData;
 
+
+export type SvgFragmentExport = {
+    svgCode: string;
+    pluginData: NodePluginData;
+}

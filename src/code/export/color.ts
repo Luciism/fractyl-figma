@@ -30,3 +30,37 @@ export function rgbToHex(r: number, g: number, b: number, a?: number): string {
 
     return `${hexString}${toHex(a)}`;
 }
+
+
+export function rgbToRgba(rgb: RGB, a: number): RGBA {
+    return {r: rgb.r, g: rgb.g, b: rgb.b, a: a}
+}
+
+function changeGradientOpacity(paint: GradientPaint, alpha: number): GradientPaint {
+    return {
+        opacity: alpha,
+        gradientStops: paint.gradientStops,
+        blendMode: paint.blendMode,
+        gradientTransform: paint.gradientTransform,
+        visible: paint.visible,
+        type: paint.type,
+    }
+}
+
+export function changeNodeFillOpacity(node: FrameNode, alpha: number) {
+    if (typeof node.fills != "symbol") {
+        node.fills = node.fills.map(fill => {
+            switch (fill.type) {
+                case "SOLID":
+                    return figma.util.solidPaint(rgbToRgba(fill.color, alpha), {blendMode: fill.blendMode, boundVariables: fill.boundVariables, opacity: alpha});
+                case "GRADIENT_LINEAR":
+                case "GRADIENT_RADIAL":
+                case "GRADIENT_ANGULAR":
+                case "GRADIENT_DIAMOND":
+                    return changeGradientOpacity(fill, alpha);
+            }
+
+            return fill;
+        })
+    }
+}

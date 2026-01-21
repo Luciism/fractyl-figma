@@ -1,26 +1,34 @@
-import { FractylShapeNodeData, FractylShapeNodeDataAttributes, NodePluginData } from "../shared/types";
+import { NodePluginData } from "../shared/types";
 import { getNodeId } from "./ids";
-import { getShapeHeightMode, getShapeWidthMode } from "./shapes";
+import { getColorMode, getShapeHeightMode, getShapeWidthMode } from "./modes";
 import { getNodeTag } from "./tagging";
 
-function getShapeAttributes(node: SceneNode): FractylShapeNodeDataAttributes {
-    return {
-        widthMode: getShapeWidthMode(node),
-        heightMode: getShapeHeightMode(node)
-    }
-}
+
 
 figma.on("selectionchange", () => {
     const nodes = figma.currentPage.selection.map(node => {
         const tag = getNodeTag(node);
 
         if (tag === "shape") {
-            const nodeData: FractylShapeNodeData = {
+            return {
                 id: getNodeId(node),
                 tag: tag,
-                attributes: getShapeAttributes(node) 
+                attributes: {
+                    widthMode: getShapeWidthMode(node),
+                    heightMode: getShapeHeightMode(node),
+                    colorMode: getColorMode(node)
+                }
             };
-            return nodeData;
+        }
+
+        if (tag === "text") {
+            return {
+                id: getNodeId(node),
+                tag,
+                attributes: {
+                    colorMode: getColorMode(node)
+                } 
+            };
         }
 
         const nodeData: NodePluginData = {

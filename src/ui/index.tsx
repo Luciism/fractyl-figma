@@ -8,12 +8,18 @@ import IdManagementTab from "./tabs/ids";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ShapesTab from "./tabs/shape";
+import TextTab from "./tabs/text";
 
 const tabs = [
   {
     id: "shape",
     button: "Shapes",
     Component: ShapesTab,
+  },
+  {
+    id: "text",
+    button: "Text",
+    Component: TextTab,
   },
   {
     id: "element-tagging",

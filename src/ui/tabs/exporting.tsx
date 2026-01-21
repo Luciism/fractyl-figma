@@ -38,11 +38,15 @@ export default function ExportingTab({
             const msg = event.data.pluginMessage;
 
             if (msg.type === "static-rendered") {
-                const filename = msg.filename;
-                const image = msg.image;
+                const files: {filename: string, file: Uint8Array<ArrayBuffer>}[] = msg.files;
 
-                const blob = new Blob([image], { type: "image/png" });
-                downloadBlob(blob, filename);
+                files.forEach(file => {
+                    const filename = file.filename;
+                    const image = file.file;
+
+                    const blob = new Blob([image], { type: "image/png" });
+                    downloadBlob(blob, filename);
+                })
                 return;
             }
 

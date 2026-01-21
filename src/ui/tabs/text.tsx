@@ -1,14 +1,12 @@
 import { FormEvent, useState, useEffect } from "react";
 import { NodePluginData } from "../../shared/types";
 
-export default function ShapesTab({
+export default function TextTab({
     setLoading,
 }: {
     setLoading: (isLoading: boolean) => void;
 }) {
     const [elementIdInput, setElementIdInput] = useState("");
-    const [widthMode, setWidthMode] = useState("fixed");
-    const [heightMode, setHeightMode] = useState("fixed");
     const [colorMode, setColorMode] = useState("fixed");
 
     useEffect(() => {
@@ -17,13 +15,11 @@ export default function ShapesTab({
 
             if (msg.type === "selection-changed") {
                 const selectedNodes: NodePluginData[] = msg.selectedNodes;
-                const selectedShapeNodes = selectedNodes.filter(node => node.tag === "shape");
+                const selectedTextNodes = selectedNodes.filter(node => node.tag === "text");
 
-                if (selectedShapeNodes[0]) {
-                    const node = selectedShapeNodes[0];
+                if (selectedTextNodes[0]) {
+                    const node = selectedTextNodes[0];
                     setElementIdInput(node.id || "");
-                    setWidthMode(node.attributes.widthMode);
-                    setHeightMode(node.attributes.heightMode);
                     setColorMode(node.attributes.colorMode);
                 }
             }
@@ -40,13 +36,11 @@ export default function ShapesTab({
         parent.postMessage(
             {
                 pluginMessage: {
-                    type: "update-selection-shape-data",
-                    shapeNodeData: {
+                    type: "update-selection-text-data",
+                    textNodeData: {
                         id: elementIdInput,
                         attributes: {
-                            widthMode,
-                            heightMode,
-                            colorMode 
+                            colorMode
                         }
                     },
                 },
@@ -58,7 +52,7 @@ export default function ShapesTab({
     return (
         <div className="tab">
             <div>
-                <h2>Shape Properties</h2>
+                <h2>Text Properties</h2>
 
                 <form onSubmit={handleSubmit}>
                     <label htmlFor="element-id-input">Element ID</label>
@@ -75,26 +69,6 @@ export default function ShapesTab({
                         id="color-mode-select"
                         value={colorMode}
                         onChange={(e) => setColorMode(e.target.value)}
-                    >
-                        <option value="fixed">Fixed</option>
-                        <option value="dynamic">Dynamic</option>
-                    </select>
-
-                    <label htmlFor="width-mode-select">Width Mode</label>
-                    <select
-                        id="width-mode-select"
-                        value={widthMode}
-                        onChange={(e) => setWidthMode(e.target.value)}
-                    >
-                        <option value="fixed">Fixed</option>
-                        <option value="dynamic">Dynamic</option>
-                    </select>
-
-                    <label htmlFor="height-mode-select">Height Mode</label>
-                    <select
-                        id="height-mode-select"
-                        value={heightMode}
-                        onChange={(e) => setHeightMode(e.target.value)}
                     >
                         <option value="fixed">Fixed</option>
                         <option value="dynamic">Dynamic</option>

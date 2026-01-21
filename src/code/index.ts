@@ -3,9 +3,9 @@ import exportRasterizedStaticElements from "./export/static.ts";
 import { setNodeId } from "./ids.ts";
 import getTaggedNodes, { setNodeTag } from "./tagging.ts";
 import "./selection.ts";
-import { isShapeNode } from "./nodes.ts";
-import { FractylShapeNodeData } from "../shared/types.ts";
-import { setShapeHeightMode, setShapeWidthMode } from "./shapes.ts";
+import { isShapeNode, isTextNode } from "./nodes.ts";
+import { FractylShapeNodeData, FractylTextNodeData } from "../shared/types.ts";
+import { setColorMode, setShapeHeightMode, setShapeWidthMode } from "./modes.ts";
 
 figma.showUI(__html__, { width: 400, height: 500 });
 
@@ -16,7 +16,8 @@ figma.ui.onmessage = (msg: {
     tag: string;
     restrictTo?: string;
     selectionId?: string;
-    shapeNodeData?: FractylShapeNodeData
+    shapeNodeData?: FractylShapeNodeData,
+    textNodeData?: FractylTextNodeData
 }) => {
     if (msg.type === "tag-selection") {
         const items = figma.currentPage.selection;
@@ -76,6 +77,21 @@ figma.ui.onmessage = (msg: {
                     setNodeTag(node, "shape");
                     setShapeWidthMode(node, shapeNodeData.attributes.widthMode);
                     setShapeHeightMode(node, shapeNodeData.attributes.heightMode);
+                    setColorMode(node, shapeNodeData.attributes.colorMode);
+                }
+            })
+        }
+    }
+
+    else if (msg.type === "update-selection-text-data") {
+        const textNodeData = msg.textNodeData;
+
+        if (textNodeData !== undefined) {
+            figma.currentPage.selection.forEach(node => {
+                if (isTextNode(node)) {
+                    setNodeId(node, textNodeData.id);
+                    setNodeTag(node, "text");
+                    setColorMode(node, textNodeData.attributes.colorMode);
                 }
             })
         }

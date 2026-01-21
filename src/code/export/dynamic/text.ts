@@ -1,4 +1,5 @@
 import { getNodeId } from "../../ids.ts";
+import { getColorMode } from "../../modes.ts";
 import { rgbToHex } from "../color.ts";
 import { svgOpeningTag } from "../svg.ts";
 import xmlFormat from "xml-formatter";
@@ -56,7 +57,14 @@ function getTextNodePositionAndAlignment(
     };
 }
 
-function fillsToSvgColor(fills: readonly Paint[]) {
+function fillsToSvgColor(node: TextNode, fills: readonly Paint[]) {
+    const nodeId = getNodeId(node);
+    const colorMode = getColorMode(node);
+
+    if (colorMode == "dynamic") {
+        return `{${nodeId}#fill}`
+    }
+
     // FIXME: handle layered colors and gradients
     const fill = fills[0];
 
@@ -101,7 +109,7 @@ function buildSegmentedTextSvgElement(masterNode: SceneNode, textNode: TextNode)
             <tspan
                 fractyl-id=${nodeId}
                 font-size="${segment.fontSize}"
-                fill="${fillsToSvgColor(segment.fills)}"
+                fill="${fillsToSvgColor(textNode, segment.fills)}"
                 font-weight="${segment.fontWeight}"
                 font-family="${segment.fontName.family}, ${FALLBACKFONTFAMILY}"
             >
@@ -134,7 +142,7 @@ export function buildTextSvgElement(masterNode: SceneNode, textNode: TextNode) {
             dominant-baseline="${position.anchorY}"
             font-family="${textNode.fontName.family}, ${FALLBACKFONTFAMILY}"
             font-size="${textNode.fontSize}"
-            fill="${fillsToSvgColor(textNode.fills)}"
+            fill="${fillsToSvgColor(textNode, textNode.fills)}"
         >
             {${nodeId}#text}
         </text>

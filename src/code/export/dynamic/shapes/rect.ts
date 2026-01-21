@@ -1,11 +1,13 @@
+import { SvgFragmentExport } from "../../../../shared/types";
 import { getNodeId } from "../../../ids";
-import { getShapeHeightMode, getShapeWidthMode } from "../../../shapes";
+import { getColorMode, getShapeHeightMode, getShapeWidthMode } from "../../../modes";
 import { createLinearGradient, createRadialGradient } from "../gradients";
 
-export function rectangleToSVG(node: RectangleNode): string {
+export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
   const { width, height } = node;
   const widthMode = getShapeWidthMode(node);
   const heightMode = getShapeHeightMode(node);
+  const colorMode = getColorMode(node);
   const nodeId = getNodeId(node);
   
   // Build SVG parts
@@ -19,13 +21,17 @@ export function rectangleToSVG(node: RectangleNode): string {
     const fill = node.fills[0];
     
     if (fill.type === 'SOLID' && fill.visible !== false) {
-      const { r, g, b } = fill.color;
-      const a = fill.opacity !== undefined ? fill.opacity : 1;
-      fillAttr = `fill="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})"`;
+      if (colorMode == "dynamic") {
+          fillAttr = `fill="{${nodeId}#fill}"`;
+      } else {
+          const { r, g, b } = fill.color;
+          const a = fill.opacity !== undefined ? fill.opacity : 1;
+          fillAttr = `fill="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})"`;
+      }
     } 
     else if (fill.type === 'GRADIENT_LINEAR' && fill.visible !== false) {
       const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
-      const gradient = createLinearGradient(fill, gradientId);
+      const gradient = createLinearGradient(fill, gradientId, nodeId, colorMode);
       defs.push(gradient);
       fillAttr = `fill="url(#${gradientId})"`;
     }
@@ -81,9 +87,22 @@ export function rectangleToSVG(node: RectangleNode): string {
   // Build complete SVG
   const defsSection = defs.length > 0 ? `<defs>${defs.join('')}</defs>` : '';
   
-  return `<svg width="${widthAttr}" height="${heightAttr}" viewBox="0 0 ${widthAttr} ${heightAttr}" xmlns="http://www.w3.org/2000/svg">
+  const svgCode = `<svg width="${widthAttr}" height="${heightAttr}" viewBox="0 0 ${widthAttr} ${heightAttr}" xmlns="http://www.w3.org/2000/svg">
   ${defsSection}
   <rect ${rectAttrs} />
 </svg>`;
+
+    return {
+        svgCode,
+        pluginData: {
+            id: nodeId,
+            tag: "shape",
+            attributes: {
+                widthMode,
+                heightMode,
+                colorMode
+            }
+        }
+    }
 }
 

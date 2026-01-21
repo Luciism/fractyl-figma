@@ -54,3 +54,10 @@ export function isShapeNode(node: SceneNode) {
     node.type === "STAR" 
   ) 
 }
+
+export function isTextNode(node: SceneNode) {
+  return (
+    node.type === "TEXT" 
+  ) 
+}
+
