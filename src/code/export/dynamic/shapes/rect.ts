@@ -15,6 +15,7 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
   let fillAttr = '';
   let strokeAttr = '';
   let strokeWidth = 0;
+  const placeholders: string[] = [];
 
   // Handle fills
   if (node.fills && typeof node.fills !== "symbol" && node.fills.length > 0) {
@@ -23,6 +24,7 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
     if (fill.type === 'SOLID' && fill.visible !== false) {
       if (colorMode == "dynamic") {
           fillAttr = `fill="{${nodeId}#fill}"`;
+            placeholders.push(`${nodeId}#fill`);
       } else {
           const { r, g, b } = fill.color;
           const a = fill.opacity !== undefined ? fill.opacity : 1;
@@ -31,7 +33,8 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
     } 
     else if (fill.type === 'GRADIENT_LINEAR' && fill.visible !== false) {
       const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
-      const gradient = createLinearGradient(fill, gradientId, nodeId, colorMode);
+      const {gradient, placeholders: gradientPlaceholders} = createLinearGradient(fill, gradientId, nodeId, colorMode);
+      placeholders.concat(gradientPlaceholders);
       defs.push(gradient);
       fillAttr = `fill="url(#${gradientId})"`;
     }
@@ -71,8 +74,22 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
   // SVG automatically clamps rx to half the smallest dimension for pill shapes
   rx = Math.min(rx, width / 2, height / 2);
     
-  const widthAttr = widthMode == "dynamic" && nodeId ? `{${nodeId}#width}` : `${width}`;
-  const heightAttr = heightMode == "dynamic" && nodeId ? `{${nodeId}#height}` : `${height}`;
+  let widthAttr: string;
+    if (widthMode == "dynamic" && nodeId) {
+        widthAttr = `{${nodeId}#width}`;
+        placeholders.push(`${nodeId}#width`);
+    } else {
+        widthAttr = width.toString();
+    }
+
+  let heightAttr: string;
+    if (heightMode == "dynamic" && nodeId) {
+        heightAttr = `{${nodeId}#height}`;
+        placeholders.push(`${nodeId}#height`);
+    } else {
+        heightAttr = height.toString();
+    }
+
 
   const rectAttrs = [
     `x="0"`,
@@ -91,9 +108,11 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
   ${defsSection}
   <rect ${rectAttrs} />
 </svg>`;
-
+    
     return {
         svgCode,
+        // schema,
+        placeholders,
         pluginData: {
             id: nodeId,
             tag: "shape",

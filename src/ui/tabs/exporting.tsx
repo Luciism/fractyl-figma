@@ -33,6 +33,14 @@ export default function ExportingTab({
         );
     };
 
+    const executeCompleteExport = () => {
+        setLoading(true);
+        parent.postMessage(
+            { pluginMessage: { type: "complete-export" } },
+            "*",
+        );
+    };
+
     useEffect(() => {
         const onMessage = (event: MessageEvent) => {
             const msg = event.data.pluginMessage;
@@ -61,6 +69,14 @@ export default function ExportingTab({
                 );
                 return;
             }
+
+            if (msg.type === "complete-export") {
+                const zipFile = msg.zipFile;
+
+                const blob = new Blob([zipFile], { type: "application/zip" });
+                downloadBlob(blob, msg.filename);
+                return;
+            }
         };
         window.addEventListener("message", onMessage);
 
@@ -78,6 +94,11 @@ export default function ExportingTab({
                 <label htmlFor="export-templates-btn">Export Dynamic Templates</label>
                 <button onClick={executeExportDynamicTemplate} id="export-templates-btn">
                     Export Dynamic Template
+                </button>
+
+                <label htmlFor="complete-export-btn">Complete Export</label>
+                <button onClick={executeCompleteExport} id="complete-export-btn">
+                    Complete Export
                 </button>
             </form>
 

@@ -64,5 +64,8 @@ export type NodePluginData =
 
 export type SvgFragmentExport = {
     svgCode: string;
+    // schema: ImageFragmentSchema | TextFragmentSchema | ShapeFragmentSchema;
+    placeholders: string[],
     pluginData: NodePluginData;
 }
+

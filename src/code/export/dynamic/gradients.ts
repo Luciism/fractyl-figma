@@ -1,8 +1,11 @@
 import { ModeAttribute } from "../../../shared/types";
 
-export function createLinearGradient(fill: GradientPaint, id: string, nodeId: string | null, colorMode: ModeAttribute): string {
+export function createLinearGradient(fill: GradientPaint, id: string, nodeId: string | null, colorMode: ModeAttribute): {gradient: string, placeholders: string[]} {
+    const placeholders: string[] = [];
+
     const stops = fill.gradientStops.map((stop, i) => {
         if (colorMode == "dynamic") {
+            placeholders.push(`${nodeId}#gradientStop.${i}`);
             return `<stop offset="${stop.position}" stop-color="{${nodeId}#gradientStop.${i}}" />`;
         }
 
@@ -24,9 +27,11 @@ export function createLinearGradient(fill: GradientPaint, id: string, nodeId: st
     const x2 = a * 1 + b * 0.5 + tx;
     const y2 = c * 1 + d * 0.5 + ty;
 
-    return `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="objectBoundingBox">
+
+    const gradient = `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="objectBoundingBox">
     ${stops}
   </linearGradient>`;
+    return {gradient, placeholders};
 }
 
 export function createRadialGradient(fill: GradientPaint, id: string, width: number, height: number): string {

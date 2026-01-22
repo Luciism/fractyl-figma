@@ -6,6 +6,7 @@ import "./selection.ts";
 import { isShapeNode, isTextNode } from "./nodes.ts";
 import { FractylShapeNodeData, FractylTextNodeData } from "../shared/types.ts";
 import { setColorMode, setShapeHeightMode, setShapeWidthMode } from "./modes.ts";
+import completeExport from "./export/all.ts";
 
 figma.showUI(__html__, { width: 400, height: 500 });
 
@@ -48,14 +49,22 @@ figma.ui.onmessage = (msg: {
     }
 
     else if (msg.type === "rasterize-static") {
-        figma.currentPage.selection.forEach(node => {
-            exportRasterizedStaticElements(node);
+        figma.currentPage.selection.forEach(async node => {
+            const statics = await exportRasterizedStaticElements(node);
+            figma.ui.postMessage({type: "static-rendered", files: statics.files});
         })
     }
 
     else if (msg.type === "export-dynamic-template") {
         figma.currentPage.selection.forEach(async node => {
-            await exportDynamicFragments(node);
+            const fragments = await exportDynamicFragments(node);
+            figma.ui.postMessage({type: "dynamic-export", files: fragments.files});
+        })
+    }
+
+    else if (msg.type === "complete-export") {
+        figma.currentPage.selection.forEach(async node => {
+            await completeExport(node);
         })
     }
 
