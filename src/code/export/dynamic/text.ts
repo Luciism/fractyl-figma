@@ -155,7 +155,7 @@ export function buildTextSvgElement(masterNode: SceneNode, textNode: TextNode): 
 
 export default function exportTextFragments(masterNode: SceneNode, textNodes: TextNode[]): {svgCode: string, schema: TextFragmentSchema} {
     const textSvgs: string[] = [];
-    const placeholders: string[] = [];
+    let placeholders: string[] = [];
 
     textNodes.forEach((textNode) => {
         if (!textNode.visible || !textNode.opacity || !textNode.characters) {
@@ -164,7 +164,7 @@ export default function exportTextFragments(masterNode: SceneNode, textNodes: Te
 
         const svgText = buildTextSvgElement(masterNode, textNode);
         textSvgs.push(svgText.svgCode);
-        placeholders.concat(svgText.placeholders);
+        placeholders = placeholders.concat(svgText.placeholders);
     });
 
     return {svgCode: xmlFormat(`

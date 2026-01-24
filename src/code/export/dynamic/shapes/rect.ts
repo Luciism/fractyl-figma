@@ -15,7 +15,7 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
   let fillAttr = '';
   let strokeAttr = '';
   let strokeWidth = 0;
-  const placeholders: string[] = [];
+  let placeholders: string[] = [];
 
   // Handle fills
   if (node.fills && typeof node.fills !== "symbol" && node.fills.length > 0) {
@@ -34,7 +34,7 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
     else if (fill.type === 'GRADIENT_LINEAR' && fill.visible !== false) {
       const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
       const {gradient, placeholders: gradientPlaceholders} = createLinearGradient(fill, gradientId, nodeId, colorMode);
-      placeholders.concat(gradientPlaceholders);
+      placeholders = placeholders.concat(gradientPlaceholders);
       defs.push(gradient);
       fillAttr = `fill="url(#${gradientId})"`;
     }
