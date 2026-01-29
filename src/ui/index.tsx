@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ShapesTab from "./tabs/shape";
 import TextTab from "./tabs/text";
+import ImagesTab from "./tabs/image";
 
 const tabs = [
   {
@@ -22,19 +23,27 @@ const tabs = [
     Component: TextTab,
   },
   {
-    id: "element-tagging",
-    button: "Tagging",
-    Component: TaggingTab,
+    id: "images",
+    button: "Images",
+    Component: ImagesTab,
   },
   {
-    id: "exporting",
-    button: "Exporting",
-    Component: ExportingTab,
+    id: "element-tagging",
+    button: "Tags",
+    Component: TaggingTab,
+    dividerLeft: 10,
   },
   {
     id: "ids",
     button: "IDs",
     Component: IdManagementTab,
+  },
+  {
+    id: "exporting",
+    button: "Export",
+    Component: ExportingTab,
+    dividerLeft: 10,
+    dividerRight: 0,
   },
 
 ];
@@ -62,6 +71,7 @@ function App() {
     <>
       <TabNav>
         {tabs.map((tab) => (
+        <div style={{marginLeft: tab.dividerLeft || 0, marginRight: tab.dividerRight || 0}}>
           <TabButton
             id={tab.id}
             text={tab.button}
@@ -69,6 +79,7 @@ function App() {
             activeTabId={activeTabId}
             onClick={() => setActiveTabId(tab.id)}
           />
+        </div>
         ))}
       </TabNav>
       <main id="tabs">

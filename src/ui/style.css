@@ -18,7 +18,7 @@ html {
 }
 
 #tabs {
-  height: calc(100% - 20px);
+  height: calc(100% - 42px);  /* minus tabmenu */
   padding-inline: 20px;
 
 }
