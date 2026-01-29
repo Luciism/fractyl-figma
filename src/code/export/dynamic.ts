@@ -19,8 +19,8 @@ function exportShapes(masterNode: SceneNode, taggedNodes: SceneNode[]) {
             const box = node.absoluteBoundingBox;
 
             if (box) {
-                x = box.x - masterNode.x;
-                y = box.y - masterNode.y;
+                x = Math.round(box.x - masterNode.x);
+                y = Math.round(box.y - masterNode.y);
             }
 
             const id = getNodeId(node) || Math.round(Math.random() * 10000);
@@ -60,14 +60,17 @@ export default async function exportDynamicFragments(
             filename: "text-fragments.svg",
             type: "image/svg",
             file: textFragments.svgCode,
-        },
-        {
-            filename: "image-fragments.svg",
-            type: "image/svg",
-            file: imageFragments.svgCode,
         }
     ].concat(
         shapeFragments.map(fragment => {
+            return {
+                filename: fragment.schema.src,
+                type: "image/svg",
+                file: fragment.svgCode,
+            }
+        })
+    ).concat(
+        imageFragments.map(fragment => {
             return {
                 filename: fragment.schema.src,
                 type: "image/svg",
@@ -78,8 +81,8 @@ export default async function exportDynamicFragments(
 
     return {
         schemas: {
-            imageFragments: [imageFragments.schema],
             textFragments: [textFragments.schema],
+            imageFragments: imageFragments.map(frag => frag.schema),
             shapeFragments: shapeFragments.map(frag => frag.schema)
         },
         files
