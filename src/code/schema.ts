@@ -8,6 +8,18 @@ import {
   RasterSizeSchema,
 } from "../shared/schema-types";
 
+
+const generateRandomString = (length: number) => {
+  let result = '';
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
 export default function generateSchema({
   name,
   contentBox,
@@ -26,7 +38,8 @@ export default function generateSchema({
   shapeFragments: ShapeFragmentSchema[];
 }): FractylExportSchema {
   const schema: FractylExportSchema = {
-    schemaVersion: 1, // TODO: add versioning system
+    schemaVersion: 1,
+    id: generateRandomString(32),  // Crypto not available
     name,
     contentBox,
     rasterSize,
@@ -41,25 +54,3 @@ export default function generateSchema({
   return schema;
 }
 
-// export default function generateSchema(
-//     masterNode: SceneNode,
-//     staticBase: Uint8Array<ArrayBufferLike>,
-//     textFragments: [],
-//     imageFragments: [],
-//     shapeFragments: []
-// ) {
-//     const name = masterNode.name;
-//
-//     const reader = new DataView(staticBase.buffer);
-//     const rasterSize = {
-//       width: reader.getUint32(16, false),
-//       height: reader.getUint32(20, false),
-//     };
-//
-//     const contextBox = {
-//         width: masterNode.width,
-//         height: masterNode.height,
-//         rasterX: (rasterSize.width - masterNode.width) / 2,
-//         rasterY: (rasterSize.height - masterNode.height) / 2
-//     };
-// }
