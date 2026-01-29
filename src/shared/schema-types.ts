@@ -51,6 +51,7 @@ export type FragmentsSchema = {
 
 export type FractylExportSchema = {
     schemaVersion: number;
+    id: string,
     name: string;
     rasterSize: RasterSizeSchema;
     contentBox: ContentBoxSchema;

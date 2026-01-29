@@ -58,14 +58,7 @@ function getTextNodePositionAndAlignment(
     };
 }
 
-function fillsToSvgColor(node: TextNode, fills: readonly Paint[]) {
-    const nodeId = getNodeId(node);
-    const colorMode = getColorMode(node);
-
-    if (colorMode == "dynamic") {
-        return `{${nodeId}#fill}`
-    }
-
+function fillsToSvgColor(fills: readonly Paint[]): string {
     // FIXME: handle layered colors and gradients
     const fill = fills[0];
 
@@ -80,80 +73,58 @@ function fillsToSvgColor(node: TextNode, fills: readonly Paint[]) {
             fill.color.b * 255,
         );
     }
-    
+
     // TODO: handle gradients
     return "white";
 }
 
+export function buildTextSvgElement(
+    masterNode: SceneNode,
+    textNode: TextNode,
+): { svgCode: string; placeholders: string[] } {
+    const fontSize = typeof textNode.fontSize != "symbol" ? textNode.fontSize : 24;
+    const fontWeight = typeof textNode.fontWeight != "symbol" ? textNode.fontWeight : 400;
+    let fill, fontFamily;
 
-function buildSegmentedTextSvgElement(masterNode: SceneNode, textNode: TextNode) {
-    const position = getTextNodePositionAndAlignment(masterNode, textNode);
+    if (typeof textNode.fontName == "symbol") {
+        fontFamily = FALLBACKFONTFAMILY;
+    } else {
+        fontFamily = textNode.fontName.family;
+    }
 
-    const segments = textNode.getStyledTextSegments(
-        ["fontSize", "fills", "fontWeight", "fontName"],
-        0,
-        textNode.characters.length,
-    );
-
-    const nodeId = getNodeId(textNode);
-    const placeholders: string[] = [];
-
-    return {svgCode: `
-        <text
-            x="${position.masterRelativeX}"
-            y="${position.masterRelativeY}"
-            text-anchor="${position.anchorX}"
-            dominant-baseline="${position.anchorY}"
-            fill="white"
-            font-size="20"
-        >
-        ${segments.map((segment, i) => {
-            placeholders.push(`${nodeId}#text.${i}`);
-            return `
-            <tspan
-                fractyl-id=${nodeId}
-                font-size="${segment.fontSize}"
-                fill="${fillsToSvgColor(textNode, segment.fills)}"
-                font-weight="${segment.fontWeight}"
-                font-family="${segment.fontName.family}, ${FALLBACKFONTFAMILY}"
-            >
-                {${nodeId}#text.${i}}
-            </tspan>`})
-        .join("\n")}
-        </text>
-    `, placeholders};
-}
-
-export function buildTextSvgElement(masterNode: SceneNode, textNode: TextNode): {svgCode: string, placeholders: string[]} {
-    if (
-        typeof textNode.fontSize == "symbol" ||
-        typeof textNode.fills == "symbol" ||
-        typeof textNode.fontName == "symbol" ||
-        typeof textNode.fontWeight == "symbol"
-    ) {
-        return buildSegmentedTextSvgElement(masterNode, textNode);
+    if (typeof textNode.fills == "symbol") {
+        fill = "white";
+    } else {
+        fill = fillsToSvgColor(textNode.fills);
     }
 
     const position = getTextNodePositionAndAlignment(masterNode, textNode);
     const nodeId = getNodeId(textNode);
 
-    return {svgCode: `
+    return {
+        svgCode: `
         <text
             fractyl-id="${nodeId}"
             x="${position.masterRelativeX}"
             y="${position.masterRelativeY}"
             text-anchor="${position.anchorX}"
             dominant-baseline="${position.anchorY}"
-            font-family="${textNode.fontName.family}, ${FALLBACKFONTFAMILY}"
-            font-size="${textNode.fontSize}"
-            fill="${fillsToSvgColor(textNode, textNode.fills)}"
+            font-family="${fontFamily}"
+            font-size="${fontSize}"
+            font-weight="${fontWeight}"
+            fill="${fill}"
         >
             {${nodeId}#text}
         </text>
-    `, placeholders: [`${nodeId}#text`]};
+    `,
+        placeholders: [`${nodeId}#text`]
+    };
 }
 
-export default function exportTextFragments(masterNode: SceneNode, textNodes: TextNode[]): {svgCode: string, schema: TextFragmentSchema} {
+export default function exportTextFragments(
+    masterNode: SceneNode,
+    textNodes: TextNode[],
+): { svgCode: string; schema: TextFragmentSchema } {
     const textSvgs: string[] = [];
     let placeholders: string[] = [];
 
@@ -167,21 +138,22 @@ export default function exportTextFragments(masterNode: SceneNode, textNodes: Te
         placeholders = placeholders.concat(svgText.placeholders);
     });
 
-    return {svgCode: xmlFormat(`
+    return {
+        svgCode: xmlFormat(
+            `
         ${svgOpeningTag(masterNode)}
         ${textSvgs.join("\n")}
         </svg>
-    `, {lineSeparator: "\n"}),
+    `,
+            { lineSeparator: "\n" },
+        ),
         schema: {
             src: "text-fragments.svg",
             placeholders,
             position: {
                 x: 0,
                 y: 0,
-            }
-        }
+            },
+        },
     };
 }
-
-
-
