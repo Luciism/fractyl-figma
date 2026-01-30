@@ -1,6 +1,5 @@
 import { TextFragmentSchema } from "../../../shared/schema-types.ts";
 import { getNodeId } from "../../ids.ts";
-import { getColorMode } from "../../modes.ts";
 import { rgbToHex } from "../color.ts";
 import { svgOpeningTag } from "../svg.ts";
 import xmlFormat from "xml-formatter";
@@ -87,7 +86,12 @@ export function buildTextSvgElement(
     let fill, fontFamily;
 
     if (typeof textNode.fontName == "symbol") {
-        fontFamily = FALLBACKFONTFAMILY;
+        const allFonts = textNode.getRangeAllFontNames(0, 1);
+        if (allFonts) {
+            fontFamily = `${allFonts[0].family}, ${FALLBACKFONTFAMILY}`
+        } else {
+            fontFamily = FALLBACKFONTFAMILY;
+        }
     } else {
         fontFamily = textNode.fontName.family;
     }
