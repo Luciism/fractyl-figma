@@ -23,6 +23,8 @@ When a Figma text node is tagged as text, it will be exported to an SVG with all
 
 At render time, requests to the renderer will provide an array of text spans. By default, they will inherit the styles provided by exported text, otherwise they can be overriden on a per text span basis. This allows various styles to be specified at render time.
 
+The parent text element can also be assigned a dynamic color, however applying fills to text spans will override this.
+
 It is important to keep track of the fonts used throughout the layout, as the font files must be available to the renderer, (see [TODO](./todo))
 
 ### Shapes
@@ -74,7 +76,7 @@ Dynamic images can be inserted at render time. For example:
 
 At render time, a image can be provided and used as a background image for the layout. This works by exporting a reduced opacity static raster alongside its content mask. At render time, the mask is applied to the background image and composited with the translucent static raster.
 
-To reduce the opacity, each node tree of a layout is walked until the first one with a fill is found. This node will have its fill opacity reduced. This would work with a in the case of a single background fill or a grid-like tile layout.
+To reduce the opacity, each node tree of a layout is walked until the first one with a fill is found. This node will have its fill opacity reduced. This would work with in the case of a single background fill or a grid-like tiled layout.
 
 ## Exporting
 
@@ -83,6 +85,59 @@ To do a complete export of a layout, select the entire layout and use **Complete
 Once downloaded, extract the contents of the zip file into it's own folder inside the `templates/` folder of the renderer.
 
 *This may take a while depending on the layout size.*
+
+
+## Examples
+
+### Footer Text (text)
+
+1. Select the text node for the footer text. From the `Text` tab, assign an ID to the text node (e.g. "footer").
+2. Export Layout
+3. Render layout and provide the placeholder value:
+
+```json
+{
+    "text": {
+        "footer#text": [
+            {"value": "Fractyl Rendering"},
+            {"value": "Saturday 7th Feburary, 2026", "fill": "#cccccc", "font_weight": "300"}
+        ]
+    }
+}
+```
+
+### Player Skin Model (image)
+
+1. Add image to layout, select it, and give it an ID from the `Image` tab. 
+2. Export the layout.
+3. Render layout and provide the placeholder value:
+
+```json
+{
+    "images": {
+        "skin_model#href": "data:image/png;base64,..."
+    }
+}
+```
+
+### Progress Bar (shape)
+
+1. Create a rectangle shape styled to your liking (radiused, gradients, etc).
+2. From the `Shapes` tab, give the rectangle node an ID (e.g. "progress_bar"), and set the `Width Mode` to `Dynamic`.
+3. Export the layout.
+4. Render layout and provide the placeholder values:
+
+```json
+{
+    "shapes": {
+        "progress_bar#width": "400",  // Pixels
+
+        // Optionally apply dynamic color
+        "progress_bar#gradientStop.0": "darkgreen",
+        "progress_bar#gradientStop.1": "green"
+    }
+}
+```
 
 ## Development
 
