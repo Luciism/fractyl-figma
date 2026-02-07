@@ -1,5 +1,6 @@
 import { TextFragmentSchema } from "../../../shared/schema-types.ts";
 import { getNodeId } from "../../ids.ts";
+import { getColorMode } from "../../modes.ts";
 import { rgbToHex } from "../color.ts";
 import { svgOpeningTag } from "../svg.ts";
 import xmlFormat from "xml-formatter";
@@ -96,14 +97,19 @@ export function buildTextSvgElement(
         fontFamily = textNode.fontName.family;
     }
 
-    if (typeof textNode.fills == "symbol") {
+    const nodeId = getNodeId(textNode);
+    const placeholders: string[] = [`${nodeId}#text`];
+
+    if (getColorMode(textNode) == "dynamic") {
+        fill = `{${nodeId}#fill}`;
+        placeholders.push(`${nodeId}#fill`);
+    } else if (typeof textNode.fills == "symbol") {
         fill = "white";
     } else {
         fill = fillsToSvgColor(textNode.fills);
     }
 
     const position = getTextNodePositionAndAlignment(masterNode, textNode);
-    const nodeId = getNodeId(textNode);
 
     return {
         svgCode: `
@@ -121,7 +127,7 @@ export function buildTextSvgElement(
             {${nodeId}#text}
         </text>
     `,
-        placeholders: [`${nodeId}#text`]
+        placeholders
     };
 }
 
