@@ -2,6 +2,8 @@
 
 Fractyl is a pipeline for turning figma designs into SVG templates, exporting, and rendering them with actual data.
 
+For the fractyl renderer, see [Luciism/fractyl-rendererer](https://github.com/Luciism/fractyl-renderer.git).
+
 ## Layouts
 
 Layouts are designed in Figma using various elements such as frames, shapes, text, and images. They can have a mix of **static content** and **dynamic content**. When a layout is exported as a template, the static content will be extracted and rasterized to a PNG file. Dynamic content (shapes, images, text) will be exported as fragmented SVG files with placeholders that will be replaced with actual data at render time.
