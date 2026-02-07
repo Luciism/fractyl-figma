@@ -158,7 +158,7 @@ export default function exportTextFragments(
             { lineSeparator: "\n" },
         ),
         schema: {
-            src: "text-fragments.svg",
+            src: "text/text-fragments.svg",
             placeholders,
             position: {
                 x: 0,

@@ -57,7 +57,7 @@ export default async function exportDynamicFragments(
 
     const files = [
         {
-            filename: "text-fragments.svg",
+            filename: textFragments.schema.src,
             type: "image/svg",
             file: textFragments.svgCode,
         }
