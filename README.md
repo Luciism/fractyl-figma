@@ -22,12 +22,13 @@ When a Figma text node is tagged as text, it will be exported to an SVG with all
 - Font (size, weight, family)
 - Fill color
 - Alignment (left, center, right)
+- Text shadow
 
 At render time, requests to the renderer will provide an array of text spans. By default, they will inherit the styles provided by exported text, otherwise they can be overriden on a per text span basis. This allows various styles to be specified at render time.
 
 The parent text element can also be assigned a dynamic color, however applying fills to text spans will override this.
 
-It is important to keep track of the fonts used throughout the layout, as the font files must be available to the renderer, (see [TODO](./todo))
+It is important to keep track of the fonts used throughout the layout, as the font files must be available to the renderer, (see [Luciism/fractyl-renderer](https://github.com/Luciism/fractyl-renderer/))
 
 ### Shapes
 
@@ -64,6 +65,10 @@ To specify a dynamic gradient fill at render time:
 "shapeid#gradientStop.2": "#0000ff"
 ...
 ```
+
+**Clipping to parent**
+
+By default, shapes will be clipped to its parent, meaning it will be positioned relative to its parent's bounding box. This allows for percentages to be specified for dynamic sizes when the max size is unknown. To disable this behavior, uncheck the `Clip to parent` checkbox in the `Shape` tab of the plugin UI.
 
 
 ### Images
@@ -126,13 +131,14 @@ Once downloaded, extract the contents of the zip file into it's own folder insid
 
 1. Create a rectangle shape styled to your liking (radiused, gradients, etc).
 2. From the `Shapes` tab, give the rectangle node an ID (e.g. "progress_bar"), and set the `Width Mode` to `Dynamic`.
-3. Export the layout.
-4. Render layout and provide the placeholder values:
+3. Ensure that `Clip to parent` is checked.
+4. Export the layout.
+5. Render layout and provide the placeholder values:
 
 ```json
 {
     "shapes": {
-        "progress_bar#width": "400",  // Pixels
+        "progress_bar#width": "50%",  // 50% of parent width (because 'Clip to parent' is checked)
 
         // Optionally apply dynamic color
         "progress_bar#gradientStop.0": "darkgreen",
