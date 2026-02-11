@@ -115,7 +115,6 @@ figma.ui.onmessage = (msg: {
                     setShapeWidthMode(node, shapeNodeData.attributes.widthMode);
                     setShapeHeightMode(node, shapeNodeData.attributes.heightMode);
                     setColorMode(node, shapeNodeData.attributes.colorMode);
-                    console.log("Should clip: ", shapeNodeData.attributes.shouldClipToParent);
                     setShouldClipToParent(node, shapeNodeData.attributes.shouldClipToParent);
                 }
             })

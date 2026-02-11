@@ -11,22 +11,22 @@ import { changeNodeFillOpacity } from "./color.ts";
 async function rasterizeTranslucent(clone: FrameNode) {
   // Recursively traverses frames to find the first one with a fill.
   // This sets the opacity of each tile
-  const recursivelyUnfillBaseFrame = (node: FrameNode) => {
-    node.children.forEach((child) => {
-      if (child.type == "INSTANCE") {
-        child = child.detachInstance();
+  const recursivelyUnfillBaseFrame = (node: SceneNode) => {
+      if (node.type == "INSTANCE") {
+        node = node.detachInstance();
       }
 
-      if (child.type == "FRAME") {
+      if (node.type == "FRAME") {
         // Ensure it isn't a layout frame
-        if (typeof child.fills != "symbol" && child.fills.length) {
-          changeNodeFillOpacity(child, 0.8);
+        if (typeof node.fills != "symbol" && node.fills.length) {
+          changeNodeFillOpacity(node, 0.8);
           return;
         }
 
-        recursivelyUnfillBaseFrame(child);
+        node.children.forEach((child) => {
+            recursivelyUnfillBaseFrame(child);
+        });
       }
-    });
   };
   recursivelyUnfillBaseFrame(clone);
 
@@ -87,6 +87,7 @@ async function rasterizeMask(clone: FrameNode) {
     node.effects = [];
     node.strokes = [];
 
+    // If node has a fill, make white.
     if (typeof node.fills == "symbol" || node.fills.length) {
       node.fills = [figma.util.solidPaint("#FFFFFF")];
     }
@@ -99,7 +100,10 @@ async function rasterizeMask(clone: FrameNode) {
   };
 
   recursivelyRemoveEffects(clone);
-  clone.fills = [figma.util.solidPaint("#000000")];
+
+  if (typeof clone.fills != "symbol" && !clone.fills.length) {
+      clone.fills = [figma.util.solidPaint("#000000")];
+  }
 
   // Ensure offset due to effects are accounted for.
   if (absoluteWidth > clone.width) {

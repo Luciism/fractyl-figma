@@ -32,7 +32,6 @@ export function rgbToHex(r: number, g: number, b: number, a?: number): string {
 }
 
 export function rgbaToHex(rgba: RGBA, include_alpha: boolean = false): string {
-    console.log("CONVERTING COLOR:", rgba);
     return rgbToHex(rgba.r * 255, rgba.g * 255, rgba.b * 255, include_alpha ? rgba.a * 255 : undefined);
 }
 
