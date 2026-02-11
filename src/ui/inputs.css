@@ -5,7 +5,8 @@ form {
   height: 100%;
   gap: 2px;
 
-  label {
+  label,
+  div.checkbox {
     font-size: 12px;
 
     margin-bottom: 4px;
@@ -70,6 +71,22 @@ form {
 
     &.error {
       color: #ef3232
+    }
+  }
+
+  & div.checkbox {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+
+    & label {
+      margin: 0 !important;
+      font-size: 14px;
+    }
+
+    & input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
     }
   }
 }

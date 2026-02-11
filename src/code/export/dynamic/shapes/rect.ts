@@ -2,79 +2,84 @@ import { SvgFragmentExport } from "../../../../shared/types";
 import { getNodeId } from "../../../ids";
 import { getColorMode, getShapeHeightMode, getShapeWidthMode } from "../../../modes";
 import { createLinearGradient, createRadialGradient } from "../gradients";
+import { getShouldClipToParent } from "./clipping";
 
 export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
-  const { width, height } = node;
-  const widthMode = getShapeWidthMode(node);
-  const heightMode = getShapeHeightMode(node);
-  const colorMode = getColorMode(node);
-  const nodeId = getNodeId(node);
-  
-  // Build SVG parts
-  const defs: string[] = [];
-  let fillAttr = '';
-  let strokeAttr = '';
-  let strokeWidth = 0;
-  let placeholders: string[] = [];
-
-  // Handle fills
-  if (node.fills && typeof node.fills !== "symbol" && node.fills.length > 0) {
-    const fill = node.fills[0];
-    
-    if (fill.type === 'SOLID' && fill.visible !== false) {
-      if (colorMode == "dynamic") {
-          fillAttr = `fill="{${nodeId}#fill}"`;
-            placeholders.push(`${nodeId}#fill`);
-      } else {
-          const { r, g, b } = fill.color;
-          const a = fill.opacity !== undefined ? fill.opacity : 1;
-          fillAttr = `fill="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})"`;
-      }
-    } 
-    else if (fill.type === 'GRADIENT_LINEAR' && fill.visible !== false) {
-      const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
-      const {gradient, placeholders: gradientPlaceholders} = createLinearGradient(fill, gradientId, nodeId, colorMode);
-      placeholders = placeholders.concat(gradientPlaceholders);
-      defs.push(gradient);
-      fillAttr = `fill="url(#${gradientId})"`;
+    const { width, height } = node;
+    const widthMode = getShapeWidthMode(node);
+    const heightMode = getShapeHeightMode(node);
+    const colorMode = getColorMode(node);
+    let shouldClipToParent = getShouldClipToParent(node);
+    if (shouldClipToParent == null) {
+        shouldClipToParent = true;
     }
-    else if (fill.type === 'GRADIENT_RADIAL' && fill.visible !== false) {
-      const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
-      const gradient = createRadialGradient(fill, gradientId, width, height);
-      defs.push(gradient);
-      fillAttr = `fill="url(#${gradientId})"`;
-    }
-  }
+    const nodeId = getNodeId(node);
 
-  // Handle strokes
-  if (node.strokes && typeof node.strokes !== "symbol" && node.strokes.length > 0) {
-    const stroke = node.strokes[0];
-    
-    if (stroke.visible !== false && typeof stroke !== "symbol") {
-      strokeWidth = typeof node.strokeWeight !== "symbol" ? node.strokeWeight || 1 : 1;
-      
-      if (stroke.type === 'SOLID') {
-        const { r, g, b } = stroke.color;
-        const a = stroke.opacity !== undefined ? stroke.opacity : 1;
-        strokeAttr = `stroke="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})" stroke-width="${strokeWidth}"`;
-      }
-    }
-  }
+    // Build SVG parts
+    const defs: string[] = [];
+    let fillAttr = '';
+    let strokeAttr = '';
+    let strokeWidth = 0;
+    let placeholders: string[] = [];
 
-  // Build rect element with clamped corner radius
-  let rx = typeof node.cornerRadius === 'number' 
-    ? node.cornerRadius 
-    : Math.min(
-        (node.topLeftRadius || 0),
-        (node.topRightRadius || 0),
-        (node.bottomLeftRadius || 0),
-        (node.bottomRightRadius || 0)
-      );
-  
-  // SVG automatically clamps rx to half the smallest dimension for pill shapes
-  rx = Math.min(rx, width / 2, height / 2);
-    
-  let widthAttr: string;
+    // Handle fills
+    if (node.fills && typeof node.fills !== "symbol" && node.fills.length > 0) {
+        const fill = node.fills[0];
+
+        if (fill.type === 'SOLID' && fill.visible !== false) {
+            if (colorMode == "dynamic") {
+                fillAttr = `fill="{${nodeId}#fill}"`;
+                placeholders.push(`${nodeId}#fill`);
+            } else {
+                const { r, g, b } = fill.color;
+                const a = fill.opacity !== undefined ? fill.opacity : 1;
+                fillAttr = `fill="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})"`;
+            }
+        }
+        else if (fill.type === 'GRADIENT_LINEAR' && fill.visible !== false) {
+            const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
+            const { gradient, placeholders: gradientPlaceholders } = createLinearGradient(fill, gradientId, nodeId, colorMode);
+            placeholders = placeholders.concat(gradientPlaceholders);
+            defs.push(gradient);
+            fillAttr = `fill="url(#${gradientId})"`;
+        }
+        else if (fill.type === 'GRADIENT_RADIAL' && fill.visible !== false) {
+            const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
+            const gradient = createRadialGradient(fill, gradientId, width, height);
+            defs.push(gradient);
+            fillAttr = `fill="url(#${gradientId})"`;
+        }
+    }
+
+    // Handle strokes
+    if (node.strokes && typeof node.strokes !== "symbol" && node.strokes.length > 0) {
+        const stroke = node.strokes[0];
+
+        if (stroke.visible !== false && typeof stroke !== "symbol") {
+            strokeWidth = typeof node.strokeWeight !== "symbol" ? node.strokeWeight || 1 : 1;
+
+            if (stroke.type === 'SOLID') {
+                const { r, g, b } = stroke.color;
+                const a = stroke.opacity !== undefined ? stroke.opacity : 1;
+                strokeAttr = `stroke="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})" stroke-width="${strokeWidth}"`;
+            }
+        }
+    }
+
+    // Build rect element with clamped corner radius
+    let rx = typeof node.cornerRadius === 'number'
+        ? node.cornerRadius
+        : Math.min(
+            (node.topLeftRadius || 0),
+            (node.topRightRadius || 0),
+            (node.bottomLeftRadius || 0),
+            (node.bottomRightRadius || 0)
+        );
+
+    // SVG automatically clamps rx to half the smallest dimension for pill shapes
+    rx = Math.min(rx, width / 2, height / 2);
+
+    let widthAttr: string;
     if (widthMode == "dynamic" && nodeId) {
         widthAttr = `{${nodeId}#width}`;
         placeholders.push(`${nodeId}#width`);
@@ -82,7 +87,7 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
         widthAttr = width.toString();
     }
 
-  let heightAttr: string;
+    let heightAttr: string;
     if (heightMode == "dynamic" && nodeId) {
         heightAttr = `{${nodeId}#height}`;
         placeholders.push(`${nodeId}#height`);
@@ -90,33 +95,32 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
         heightAttr = height.toString();
     }
 
-  let parent = node.parent;
-  if (parent && parent.type != "FRAME" && parent.type != "INSTANCE") {
-    parent = null;
-  }
+    let parent = node.parent;
+    if (parent && parent.type != "FRAME" && parent.type != "INSTANCE") {
+        parent = null;
+    }
 
-  const rectAttrs = [
-    `x="0"`,
-    `y="0"`,
-    `width="${widthAttr}"`,
-    `height="${heightAttr}"`,
-    rx > 0 ? `rx="${rx}"` : '',
-    fillAttr,
-    strokeAttr
-  ].filter(Boolean).join(' ');
+    const rectAttrs = [
+        `x="${parent && shouldClipToParent ? node.x : 0}"`,
+        `y="${parent && shouldClipToParent ? node.y : 0}"`,
+        `width="${widthAttr}"`,
+        `height="${heightAttr}"`,
+        rx > 0 ? `rx="${rx}"` : '',
+        fillAttr,
+        strokeAttr
+    ].filter(Boolean).join(' ');
 
-  // Build complete SVG
-  const defsSection = defs.length > 0 ? `<defs>${defs.join('')}</defs>` : '';
-  
-  // TODO: add restrict to parent size config option
-  const svgWidth = parent ? parent.width : widthAttr;
-  const svgHeight = parent ? parent.height : heightAttr;
+    // Build complete SVG
+    const defsSection = defs.length > 0 ? `<defs>${defs.join('')}</defs>` : '';
 
-  const svgCode = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
-  ${defsSection}
-  <rect ${rectAttrs} />
-</svg>`;
-    
+    const svgWidth = parent && shouldClipToParent ? parent.width : widthAttr;
+    const svgHeight = parent && shouldClipToParent ? parent.height : heightAttr;
+
+    const svgCode = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+        ${defsSection}
+        <rect ${rectAttrs} />
+    </svg>`;
+
     return {
         svgCode,
         // schema,
@@ -127,7 +131,8 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
             attributes: {
                 widthMode,
                 heightMode,
-                colorMode
+                colorMode,
+                shouldClipToParent
             }
         }
     }

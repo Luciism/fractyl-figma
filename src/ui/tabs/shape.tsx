@@ -10,6 +10,7 @@ export default function ShapesTab({
     const [widthMode, setWidthMode] = useState("fixed");
     const [heightMode, setHeightMode] = useState("fixed");
     const [colorMode, setColorMode] = useState("fixed");
+    const [clipToParent, setClipToParent] = useState(true);
 
     useEffect(() => {
         const onMessage = (event: MessageEvent) => {
@@ -21,10 +22,16 @@ export default function ShapesTab({
 
                 if (selectedShapeNodes[0]) {
                     const node = selectedShapeNodes[0];
+                    let shouldClipToParent = node.attributes.shouldClipToParent;
+                    if (shouldClipToParent == null) {
+                        shouldClipToParent = true;
+                    }
+
                     setElementIdInput(node.id || "");
                     setWidthMode(node.attributes.widthMode);
                     setHeightMode(node.attributes.heightMode);
                     setColorMode(node.attributes.colorMode);
+                    setClipToParent(shouldClipToParent);
                 }
             }
         };
@@ -46,7 +53,8 @@ export default function ShapesTab({
                         attributes: {
                             widthMode,
                             heightMode,
-                            colorMode 
+                            colorMode,
+                            shouldClipToParent: clipToParent
                         }
                     },
                 },
@@ -99,6 +107,16 @@ export default function ShapesTab({
                         <option value="fixed">Fixed</option>
                         <option value="dynamic">Dynamic</option>
                     </select>
+
+                    <div className="checkbox">
+                        <input
+                            id="clip-to-parent"
+                            type="checkbox"
+                            checked={clipToParent}
+                            onChange={(e) => {setClipToParent(e.target.checked)}}
+                        />
+                        <label htmlFor="clip-to-parent">Clip To Parent</label>
+                    </div>
 
                     <button type="submit">Update</button>
                 </form>

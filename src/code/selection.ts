@@ -1,4 +1,5 @@
 import { NodePluginData } from "../shared/types";
+import { getShouldClipToParent } from "./export/dynamic/shapes/clipping";
 import { getNodeId } from "./ids";
 import { getColorMode, getShapeHeightMode, getShapeWidthMode } from "./modes";
 import { getNodeTag } from "./tagging";
@@ -16,7 +17,8 @@ figma.on("selectionchange", () => {
                 attributes: {
                     widthMode: getShapeWidthMode(node),
                     heightMode: getShapeHeightMode(node),
-                    colorMode: getColorMode(node)
+                    colorMode: getColorMode(node),
+                    shouldClipToParent: getShouldClipToParent(node)
                 }
             };
         }

@@ -41,6 +41,7 @@ export type FractylShapeNodeDataAttributes = {
     widthMode: ModeAttribute;
     heightMode: ModeAttribute;
     colorMode: ModeAttribute;
+    shouldClipToParent: boolean;
 };
 
 export type FractylShapeNodeData = {

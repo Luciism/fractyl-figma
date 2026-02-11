@@ -7,6 +7,7 @@ import { isShapeNode, isTextNode } from "./nodes.ts";
 import { FractylImageNodeData, FractylShapeNodeData, FractylTextNodeData, isNodeTagType } from "../shared/types.ts";
 import { setColorMode, setShapeHeightMode, setShapeWidthMode } from "./modes.ts";
 import completeExport from "./export/all.ts";
+import { setShouldClipToParent } from "./export/dynamic/shapes/clipping.ts";
 
 figma.showUI(__html__, { width: 420, height: 520 });
 
@@ -114,6 +115,8 @@ figma.ui.onmessage = (msg: {
                     setShapeWidthMode(node, shapeNodeData.attributes.widthMode);
                     setShapeHeightMode(node, shapeNodeData.attributes.heightMode);
                     setColorMode(node, shapeNodeData.attributes.colorMode);
+                    console.log("Should clip: ", shapeNodeData.attributes.shouldClipToParent);
+                    setShouldClipToParent(node, shapeNodeData.attributes.shouldClipToParent);
                 }
             })
         }
