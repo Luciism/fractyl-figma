@@ -90,6 +90,10 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
         heightAttr = height.toString();
     }
 
+  let parent = node.parent;
+  if (parent && parent.type != "FRAME" && parent.type != "INSTANCE") {
+    parent = null;
+  }
 
   const rectAttrs = [
     `x="0"`,
@@ -104,7 +108,11 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
   // Build complete SVG
   const defsSection = defs.length > 0 ? `<defs>${defs.join('')}</defs>` : '';
   
-  const svgCode = `<svg width="${widthAttr}" height="${heightAttr}" viewBox="0 0 ${widthAttr} ${heightAttr}" xmlns="http://www.w3.org/2000/svg">
+  // TODO: add restrict to parent size config option
+  const svgWidth = parent ? parent.width : widthAttr;
+  const svgHeight = parent ? parent.height : heightAttr;
+
+  const svgCode = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
   ${defsSection}
   <rect ${rectAttrs} />
 </svg>`;
