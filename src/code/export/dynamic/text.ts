@@ -1,11 +1,24 @@
 import { TextFragmentSchema } from "../../../shared/schema-types.ts";
 import { getNodeId } from "../../ids.ts";
 import { getColorMode } from "../../modes.ts";
-import { rgbToHex } from "../color.ts";
+import { rgbaToHex, rgbToHex } from "../color.ts";
 import { svgOpeningTag } from "../svg.ts";
 import xmlFormat from "xml-formatter";
 
 const FALLBACKFONTFAMILY = "Inter, Arial, system-ui";
+
+function hashString(str: string) {
+    let hash = 0,
+        i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+        chr = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+
 
 interface TextPositioning {
     masterRelativeX: number;
@@ -81,9 +94,10 @@ function fillsToSvgColor(fills: readonly Paint[]): string {
 export function buildTextSvgElement(
     masterNode: SceneNode,
     textNode: TextNode,
-): { svgCode: string; placeholders: string[] } {
+): { svgCode: string; placeholders: string[], defs: string | null } {
     const fontSize = typeof textNode.fontSize != "symbol" ? textNode.fontSize : 24;
     const fontWeight = typeof textNode.fontWeight != "symbol" ? textNode.fontWeight : 400;
+    const shadows = textNode.effects.filter(effect => effect.type == "DROP_SHADOW");
     let fill, fontFamily;
 
     if (typeof textNode.fontName == "symbol") {
@@ -109,11 +123,33 @@ export function buildTextSvgElement(
         fill = fillsToSvgColor(textNode.fills);
     }
 
+    let defs = shadows.length ? `
+        <filter id="{SHADOW_ID}">
+            ${shadows.map(shadow => `<feDropShadow
+                dx="${shadow.offset.x}"
+                dy="${shadow.offset.y}"
+                stdDeviation="${shadow.radius}"
+                flood-opacity="${shadow.color.a}"
+                flood-color="${rgbaToHex(shadow.color)}"
+            />`)}
+        </filter>
+    ` : null;
+
+    // Allows for the removal of duplicate shadows later on
+    let shadow_id: string | null;
+    if (defs) {
+        shadow_id = `shadow-${hashString(defs)}`;
+        defs = defs.replace("{SHADOW_ID}", shadow_id);
+    } else {
+        shadow_id = null;
+    }
+
     const position = getTextNodePositionAndAlignment(masterNode, textNode);
 
     return {
         svgCode: `
         <text
+            ${shadow_id ? `filter="url(#${shadow_id})"` : ""}
             fractyl-id="${nodeId}"
             x="${position.masterRelativeX}"
             y="${position.masterRelativeY}"
@@ -127,7 +163,8 @@ export function buildTextSvgElement(
             {${nodeId}#text}
         </text>
     `,
-        placeholders
+        placeholders,
+        defs
     };
 }
 
@@ -136,6 +173,7 @@ export default function exportTextFragments(
     textNodes: TextNode[],
 ): { svgCode: string; schema: TextFragmentSchema } {
     const textSvgs: string[] = [];
+    const defs: string[] = [];
     let placeholders: string[] = [];
 
     textNodes.forEach((textNode) => {
@@ -146,12 +184,20 @@ export default function exportTextFragments(
         const svgText = buildTextSvgElement(masterNode, textNode);
         textSvgs.push(svgText.svgCode);
         placeholders = placeholders.concat(svgText.placeholders);
+
+        if (svgText.defs) {
+            defs.push(svgText.defs);
+        }
     });
 
+    const deDupedDefs = [...new Set(defs)];
+
     return {
-        svgCode: xmlFormat(
-            `
+        svgCode: xmlFormat( `
         ${svgOpeningTag(masterNode)}
+        <defs>
+            ${deDupedDefs.join("\n")}
+        </defs>
         ${textSvgs.join("\n")}
         </svg>
     `,

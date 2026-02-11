@@ -24,16 +24,22 @@ export function rgbToHex(r: number, g: number, b: number, a?: number): string {
 
     const hexString = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 
-    if (!a) {
+    if (a == undefined) {
         return hexString;
     }
 
     return `${hexString}${toHex(a)}`;
 }
 
+export function rgbaToHex(rgba: RGBA, include_alpha: boolean = false): string {
+    console.log("CONVERTING COLOR:", rgba);
+    return rgbToHex(rgba.r * 255, rgba.g * 255, rgba.b * 255, include_alpha ? rgba.a * 255 : undefined);
+}
+
+
 
 export function rgbToRgba(rgb: RGB, a: number): RGBA {
-    return {r: rgb.r, g: rgb.g, b: rgb.b, a: a}
+    return { r: rgb.r, g: rgb.g, b: rgb.b, a: a }
 }
 
 function changeGradientOpacity(paint: GradientPaint, alpha: number): GradientPaint {
@@ -52,7 +58,7 @@ export function changeNodeFillOpacity(node: FrameNode, alpha: number) {
         node.fills = node.fills.map(fill => {
             switch (fill.type) {
                 case "SOLID":
-                    return figma.util.solidPaint(rgbToRgba(fill.color, alpha), {blendMode: fill.blendMode, boundVariables: fill.boundVariables, opacity: alpha});
+                    return figma.util.solidPaint(rgbToRgba(fill.color, alpha), { blendMode: fill.blendMode, boundVariables: fill.boundVariables, opacity: alpha });
                 case "GRADIENT_LINEAR":
                 case "GRADIENT_RADIAL":
                 case "GRADIENT_ANGULAR":
