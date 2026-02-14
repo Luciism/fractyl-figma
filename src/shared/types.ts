@@ -23,6 +23,7 @@ export function isNodeTagType(
 
 export type FractylTextNodeDataAttributes = {
     colorMode: ModeAttribute;
+    shouldColorMatchShadow: boolean;
 };
 
 export type FractylTextNodeData = {

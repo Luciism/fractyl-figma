@@ -2,8 +2,8 @@ import { NodePluginData } from "../shared/types";
 import { getShouldClipToParent } from "./export/dynamic/shapes/clipping";
 import { getNodeId } from "./ids";
 import { getColorMode, getShapeHeightMode, getShapeWidthMode } from "./modes";
+import { getShouldColorMatchShadow } from "./shadows";
 import { getNodeTag } from "./tagging";
-
 
 
 figma.on("selectionchange", () => {
@@ -28,7 +28,8 @@ figma.on("selectionchange", () => {
                 id: getNodeId(node),
                 tag,
                 attributes: {
-                    colorMode: getColorMode(node)
+                    colorMode: getColorMode(node),
+                    shouldColorMatchShadow: getShouldColorMatchShadow(node),
                 } 
             };
         }

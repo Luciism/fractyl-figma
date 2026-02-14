@@ -1,9 +1,11 @@
 import { TextFragmentSchema } from "../../../shared/schema-types.ts";
 import { getNodeId } from "../../ids.ts";
 import { getColorMode } from "../../modes.ts";
-import { rgbaToHex, rgbToHex } from "../color.ts";
+import { getShouldColorMatchShadow } from "../../shadows.ts";
+import { rgbToHex } from "../color.ts";
 import { svgOpeningTag } from "../svg.ts";
 import xmlFormat from "xml-formatter";
+import { generateColorMatchedShadow, generateFixedShadow } from "./shadow.ts";
 
 const FALLBACKFONTFAMILY = "Inter, Arial, system-ui";
 
@@ -123,17 +125,13 @@ export function buildTextSvgElement(
         fill = fillsToSvgColor(textNode.fills);
     }
 
-    let defs = shadows.length ? `
-        <filter id="{SHADOW_ID}">
-            ${shadows.map(shadow => `<feDropShadow
-                dx="${shadow.offset.x}"
-                dy="${shadow.offset.y}"
-                stdDeviation="${shadow.radius}"
-                flood-opacity="${shadow.color.a}"
-                flood-color="${rgbaToHex(shadow.color)}"
-            />`)}
-        </filter>
-    ` : null;
+    const colorMatchShadow = getShouldColorMatchShadow(textNode);
+
+    let defs = shadows.length ? (
+        colorMatchShadow 
+            ? generateColorMatchedShadow(shadows[0])
+            : generateFixedShadow(shadows)
+    ) : null;
 
     // Allows for the removal of duplicate shadows later on
     let shadow_id: string | null;

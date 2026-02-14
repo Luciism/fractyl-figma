@@ -8,6 +8,7 @@ export default function TextTab({
 }) {
     const [elementIdInput, setElementIdInput] = useState("");
     const [colorMode, setColorMode] = useState("fixed");
+    const [colorMatchShadow, setColorMatchShadow] = useState(false);
 
     useEffect(() => {
         const onMessage = (event: MessageEvent) => {
@@ -21,6 +22,7 @@ export default function TextTab({
                     const node = selectedTextNodes[0];
                     setElementIdInput(node.id || "");
                     setColorMode(node.attributes.colorMode);
+                    setColorMatchShadow(node.attributes.shouldColorMatchShadow);
                 }
             }
         };
@@ -40,7 +42,8 @@ export default function TextTab({
                     textNodeData: {
                         id: elementIdInput,
                         attributes: {
-                            colorMode
+                            colorMode,
+                            shouldColorMatchShadow: colorMatchShadow
                         }
                     },
                 },
@@ -73,6 +76,16 @@ export default function TextTab({
                         <option value="fixed">Fixed</option>
                         <option value="dynamic">Dynamic</option>
                     </select>
+
+                    <div className="checkbox">
+                        <input
+                            id="color-match-shadow"
+                            type="checkbox"
+                            checked={colorMatchShadow}
+                            onChange={(e) => {setColorMatchShadow(e.target.checked)}}
+                        />
+                        <label htmlFor="color-match-shadow">Color Match Shadow</label>
+                    </div>
 
                     <button type="submit">Update</button>
                 </form>

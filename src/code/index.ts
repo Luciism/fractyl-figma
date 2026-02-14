@@ -8,6 +8,7 @@ import { FractylImageNodeData, FractylShapeNodeData, FractylTextNodeData, isNode
 import { setColorMode, setShapeHeightMode, setShapeWidthMode } from "./modes.ts";
 import completeExport from "./export/all.ts";
 import { setShouldClipToParent } from "./export/dynamic/shapes/clipping.ts";
+import { setShouldColorMatchShadow } from "./shadows.ts";
 
 figma.showUI(__html__, { width: 420, height: 520 });
 
@@ -130,6 +131,7 @@ figma.ui.onmessage = (msg: {
                     setNodeId(node, textNodeData.id);
                     setNodeTag(node, "text");
                     setColorMode(node, textNodeData.attributes.colorMode);
+                    setShouldColorMatchShadow(node, textNodeData.attributes.shouldColorMatchShadow);
                 }
             })
         }
