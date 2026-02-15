@@ -12,6 +12,8 @@ export default function ShapesTab({
     const [colorMode, setColorMode] = useState("fixed");
     const [clipToParent, setClipToParent] = useState(true);
 
+    const [feedbackMsg, setFeedbackMsg] = useState({ msg: null, color: "" });
+
     useEffect(() => {
         const onMessage = (event: MessageEvent) => {
             const msg = event.data.pluginMessage;
@@ -33,6 +35,12 @@ export default function ShapesTab({
                     setColorMode(node.attributes.colorMode);
                     setClipToParent(shouldClipToParent);
                 }
+
+                return;
+            }
+
+            if (msg.type === "feedback-message") {
+                setFeedbackMsg(msg.feedback);
             }
         };
 
@@ -44,6 +52,7 @@ export default function ShapesTab({
         e.preventDefault();
         setLoading(true);
 
+        setFeedbackMsg({msg: null, color: ""});
         parent.postMessage(
             {
                 pluginMessage: {
@@ -113,12 +122,13 @@ export default function ShapesTab({
                             id="clip-to-parent"
                             type="checkbox"
                             checked={clipToParent}
-                            onChange={(e) => {setClipToParent(e.target.checked)}}
+                            onChange={(e) => { setClipToParent(e.target.checked) }}
                         />
                         <label htmlFor="clip-to-parent">Clip To Parent</label>
                     </div>
 
                     <button type="submit">Update</button>
+                    {feedbackMsg.msg && <p className="feedback-msg" style={{ color: feedbackMsg.color }}>{feedbackMsg.msg}</p>}
                 </form>
             </div>
         </div>

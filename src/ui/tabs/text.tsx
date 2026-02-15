@@ -10,6 +10,8 @@ export default function TextTab({
     const [colorMode, setColorMode] = useState("fixed");
     const [colorMatchShadow, setColorMatchShadow] = useState(false);
 
+    const [feedbackMsg, setFeedbackMsg] = useState({ msg: null, color: "" });
+
     useEffect(() => {
         const onMessage = (event: MessageEvent) => {
             const msg = event.data.pluginMessage;
@@ -24,6 +26,12 @@ export default function TextTab({
                     setColorMode(node.attributes.colorMode);
                     setColorMatchShadow(node.attributes.shouldColorMatchShadow);
                 }
+
+                return;
+            }
+
+            if (msg.type === "feedback-message") {
+                setFeedbackMsg(msg.feedback);
             }
         };
 
@@ -35,6 +43,7 @@ export default function TextTab({
         e.preventDefault();
         setLoading(true);
 
+        setFeedbackMsg({msg: null, color: ""});
         parent.postMessage(
             {
                 pluginMessage: {
@@ -88,6 +97,7 @@ export default function TextTab({
                     </div>
 
                     <button type="submit">Update</button>
+                    {feedbackMsg.msg && <p className="feedback-msg" style={{ color: feedbackMsg.color }}>{feedbackMsg.msg}</p>}
                 </form>
             </div>
         </div>

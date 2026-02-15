@@ -7,6 +7,7 @@ export default function ImagesTab({
     setLoading: (isLoading: boolean) => void;
 }) {
     const [elementIdInput, setElementIdInput] = useState("");
+    const [feedbackMsg, setFeedbackMsg] = useState({msg: null, color: ""});
 
     useEffect(() => {
         const onMessage = (event: MessageEvent) => {
@@ -20,6 +21,12 @@ export default function ImagesTab({
                     const node = selectedTextNodes[0];
                     setElementIdInput(node.id || "");
                 }
+
+                return;
+            }
+
+            if (msg.type === "feedback-message") {
+                setFeedbackMsg(msg.feedback);
             }
         };
 
@@ -31,6 +38,7 @@ export default function ImagesTab({
         e.preventDefault();
         setLoading(true);
 
+        setFeedbackMsg({msg: null, color: ""});
         parent.postMessage(
             {
                 pluginMessage: {
@@ -59,6 +67,7 @@ export default function ImagesTab({
                         onChange={(e) => setElementIdInput(e.target.value)}
                     />
                     <button type="submit">Update</button>
+                    {feedbackMsg.msg && <p className="feedback-msg" style={{ color: feedbackMsg.color }}>{feedbackMsg.msg}</p>}
                 </form>
             </div>
         </div>

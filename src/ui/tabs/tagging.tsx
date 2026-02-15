@@ -49,6 +49,7 @@ export default function TaggingTab({
 
     return (
         <div className="tab">
+            <p style={{color: "yellow"}}>Advanced tab: debugging purposes only</p>
             <h2>Element Tagging</h2>
 
             <form onSubmit={(e) => e.preventDefault()}>

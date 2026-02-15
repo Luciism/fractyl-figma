@@ -117,6 +117,14 @@ figma.ui.onmessage = (msg: {
                     setShapeHeightMode(node, shapeNodeData.attributes.heightMode);
                     setColorMode(node, shapeNodeData.attributes.colorMode);
                     setShouldClipToParent(node, shapeNodeData.attributes.shouldClipToParent);
+                } else {
+                    figma.ui.postMessage({
+                        type: "feedback-message",
+                        feedback: {
+                            msg: "Some selected nodes are not valid shapes.",
+                            color: "yellow"
+                        },
+                    });
                 }
             })
         }
@@ -132,6 +140,14 @@ figma.ui.onmessage = (msg: {
                     setNodeTag(node, "text");
                     setColorMode(node, textNodeData.attributes.colorMode);
                     setShouldColorMatchShadow(node, textNodeData.attributes.shouldColorMatchShadow);
+                } else {
+                    figma.ui.postMessage({
+                        type: "feedback-message",
+                        feedback: {
+                            msg: "Some selected nodes are not valid text nodes.",
+                            color: "yellow"
+                        },
+                    });
                 }
             })
         }
@@ -145,6 +161,14 @@ figma.ui.onmessage = (msg: {
                 if (isShapeNode(node)) {
                     setNodeId(node, imageNodeData.id);
                     setNodeTag(node, "image");
+                } else {
+                    figma.ui.postMessage({
+                        type: "feedback-message",
+                        feedback: {
+                            msg: "Some selected nodes are not valid image nodes (must be rectangles).",
+                            color: "yellow"
+                        },
+                    });
                 }
             })
         }

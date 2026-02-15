@@ -88,13 +88,16 @@ export default function ExportingTab({
             <h2>Exporting</h2>
 
             <form onSubmit={(e) => e.preventDefault()}>
-                <label htmlFor="rasterize-static-btn">Rasterize Selection</label>
-                <button onClick={executeRasterizeStatic} id="rasterize-static-btn">Rasterize static layers</button>
+                <details>
+                    <summary>Debug</summary>
 
-                <label htmlFor="export-templates-btn">Export Dynamic Templates</label>
-                <button onClick={executeExportDynamicTemplate} id="export-templates-btn">
-                    Export Dynamic Template
-                </button>
+                    <button onClick={executeRasterizeStatic} id="rasterize-static-btn">Rasterize static layers</button>
+                    <button onClick={executeExportDynamicTemplate} id="export-templates-btn">
+                        Export Dynamic Template
+                    </button>
+                </details>
+
+
 
                 <label htmlFor="complete-export-btn">Complete Export</label>
                 <button onClick={executeCompleteExport} id="complete-export-btn">

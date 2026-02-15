@@ -40,6 +40,7 @@ export default function IdManagementTab({
     return (
         <div className="tab">
             <div>
+                <p style={{color: "yellow"}}>Advanced tab: debugging purposes only</p>
                 <h2>Element IDs</h2>
 
                 <form onSubmit={(e) => e.preventDefault()}>
