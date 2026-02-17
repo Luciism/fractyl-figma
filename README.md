@@ -28,6 +28,8 @@ At render time, requests to the renderer will provide an array of text spans. By
 
 The parent text element can also be assigned a dynamic color, however applying fills to text spans will override this.
 
+When the `Color match Shadow` check box is checked, the text shadow will automatically match the color of the text, even if the color is dynamic.
+
 It is important to keep track of the fonts used throughout the layout, as the font files must be available to the renderer, (see [Luciism/fractyl-renderer](https://github.com/Luciism/fractyl-renderer/))
 
 ### Shapes
