@@ -117,6 +117,7 @@ figma.ui.onmessage = (msg: {
                     setShapeHeightMode(node, shapeNodeData.attributes.heightMode);
                     setColorMode(node, shapeNodeData.attributes.colorMode);
                     setShouldClipToParent(node, shapeNodeData.attributes.shouldClipToParent);
+                    setShouldColorMatchShadow(node, shapeNodeData.attributes.shouldColorMatchShadow);
                 } else {
                     figma.ui.postMessage({
                         type: "feedback-message",

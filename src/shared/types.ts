@@ -43,6 +43,7 @@ export type FractylShapeNodeDataAttributes = {
     heightMode: ModeAttribute;
     colorMode: ModeAttribute;
     shouldClipToParent: boolean;
+    shouldColorMatchShadow: boolean;
 };
 
 export type FractylShapeNodeData = {

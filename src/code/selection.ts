@@ -18,7 +18,8 @@ figma.on("selectionchange", () => {
                     widthMode: getShapeWidthMode(node),
                     heightMode: getShapeHeightMode(node),
                     colorMode: getColorMode(node),
-                    shouldClipToParent: getShouldClipToParent(node)
+                    shouldClipToParent: getShouldClipToParent(node),
+                    shouldColorMatchShadow: getShouldColorMatchShadow(node)
                 }
             };
         }

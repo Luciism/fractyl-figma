@@ -1,7 +1,9 @@
 import { SvgFragmentExport } from "../../../../shared/types";
 import { getNodeId } from "../../../ids";
 import { getColorMode, getShapeHeightMode, getShapeWidthMode } from "../../../modes";
+import { getShouldColorMatchShadow } from "../../../shadows";
 import { createLinearGradient, createRadialGradient } from "../gradients";
+import { generateColorMatchedShadow, generateFixedShadow } from "../shadow";
 import { getShouldClipToParent } from "./clipping";
 
 export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
@@ -9,6 +11,10 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
     const widthMode = getShapeWidthMode(node);
     const heightMode = getShapeHeightMode(node);
     const colorMode = getColorMode(node);
+
+    const shouldColorMatchShadow = getShouldColorMatchShadow(node);
+    const shadows = node.effects.filter((effect) => effect.type === "DROP_SHADOW");
+
     let shouldClipToParent = getShouldClipToParent(node);
     if (shouldClipToParent == null) {
         shouldClipToParent = true;
@@ -108,7 +114,17 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
         rx > 0 ? `rx="${rx}"` : '',
         fillAttr,
         strokeAttr
-    ].filter(Boolean).join(' ');
+    ];
+
+    if (shouldColorMatchShadow && shadows.length) {
+        const shadowDef = generateColorMatchedShadow(shadows[0]);
+        defs.push(shadowDef.replace("{SHADOW_ID}", `shadow-${nodeId}`));
+        rectAttrs.push(`filter="url(#shadow-${nodeId})"`);
+    } else if (shadows.length) {
+        const shadowDef = generateFixedShadow(shadows);
+        defs.push(shadowDef.replace("{SHADOW_ID}", `shadow-${nodeId}`));
+        rectAttrs.push(`filter="url(#shadow-${nodeId})"`);
+    }
 
     // Build complete SVG
     const defsSection = defs.length > 0 ? `<defs>${defs.join('')}</defs>` : '';
@@ -118,12 +134,11 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
 
     const svgCode = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
         ${defsSection}
-        <rect ${rectAttrs} />
+        <rect ${rectAttrs.filter(Boolean).join(' ')} />
     </svg>`;
 
     return {
         svgCode,
-        // schema,
         placeholders,
         pluginData: {
             id: nodeId,
@@ -132,7 +147,8 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
                 widthMode,
                 heightMode,
                 colorMode,
-                shouldClipToParent
+                shouldClipToParent,
+                shouldColorMatchShadow
             }
         }
     }

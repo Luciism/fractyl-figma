@@ -11,6 +11,7 @@ export default function ShapesTab({
     const [heightMode, setHeightMode] = useState("fixed");
     const [colorMode, setColorMode] = useState("fixed");
     const [clipToParent, setClipToParent] = useState(true);
+    const [colorMatchShadow, setColorMatchShadow] = useState(false);
 
     const [feedbackMsg, setFeedbackMsg] = useState({ msg: null, color: "" });
 
@@ -33,6 +34,7 @@ export default function ShapesTab({
                     setWidthMode(node.attributes.widthMode);
                     setHeightMode(node.attributes.heightMode);
                     setColorMode(node.attributes.colorMode);
+                    setColorMatchShadow(node.attributes.shouldColorMatchShadow);
                     setClipToParent(shouldClipToParent);
                 }
 
@@ -63,7 +65,8 @@ export default function ShapesTab({
                             widthMode,
                             heightMode,
                             colorMode,
-                            shouldClipToParent: clipToParent
+                            shouldClipToParent: clipToParent,
+                            shouldColorMatchShadow: colorMatchShadow
                         }
                     },
                 },
@@ -125,6 +128,16 @@ export default function ShapesTab({
                             onChange={(e) => { setClipToParent(e.target.checked) }}
                         />
                         <label htmlFor="clip-to-parent">Clip To Parent</label>
+                    </div>
+
+                    <div className="checkbox">
+                        <input
+                            id="color-match-shadow"
+                            type="checkbox"
+                            checked={colorMatchShadow}
+                            onChange={(e) => {setColorMatchShadow(e.target.checked)}}
+                        />
+                        <label htmlFor="color-match-shadow">Color Match Shadow</label>
                     </div>
 
                     <button type="submit">Update</button>
