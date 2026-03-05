@@ -57,7 +57,7 @@ function getTextNodePositionAndAlignment(
     switch (node.textAlignVertical) {
         case "CENTER":
             masterRelativeY += box.height / 2;
-            anchorY = "middle";
+            anchorY = "central";  // Middle is a bit too high
             break;
         case "BOTTOM":
             masterRelativeY += box.height;
