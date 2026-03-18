@@ -61,3 +61,19 @@ export function isTextNode(node: SceneNode) {
   ) 
 }
 
+export function isScalableNode(node: SceneNode) {
+    return !(
+        node.type == "EMBED"
+        || node.type == "MEDIA"
+        || node.type == "TABLE"
+        || node.type == "STICKY"
+        || node.type == "WIDGET"
+        || node.type == "SECTION"
+        || node.type == "CONNECTOR"
+        || node.type == "SLIDE_ROW"
+        || node.type == "CODE_BLOCK"
+        || node.type == "LINK_UNFURL"
+        || node.type == "SLIDE_GRID"
+        || node.type == "INTERACTIVE_SLIDE_ELEMENT"
+    )
+}

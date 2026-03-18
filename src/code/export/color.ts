@@ -16,6 +16,7 @@ export function recursivelyRemoveStaticColors(taggedNodes: SceneNode[], node: Sc
     }
 }
 
+/** Uses values as is (expects 0-255) */
 export function rgbToHex(r: number, g: number, b: number, a?: number): string {
     const toHex = (n: number) =>
         Math.max(0, Math.min(255, Math.round(n)))
@@ -31,6 +32,7 @@ export function rgbToHex(r: number, g: number, b: number, a?: number): string {
     return `${hexString}${toHex(a)}`;
 }
 
+/** Multiply by 255 to convert from 0-1 to 0-255 */
 export function rgbaToHex(rgba: RGBA, include_alpha: boolean = false): string {
     return rgbToHex(rgba.r * 255, rgba.g * 255, rgba.b * 255, include_alpha ? rgba.a * 255 : undefined);
 }

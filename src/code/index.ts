@@ -1,5 +1,3 @@
-import exportDynamicFragments from "./export/dynamic.ts";
-import exportRasterizedStaticElements from "./export/static.ts";
 import { setNodeId } from "./ids.ts";
 import getTaggedNodes, { setNodeTag } from "./tagging.ts";
 import "./selection.ts";
@@ -125,20 +123,6 @@ figma.ui.onmessage = (msg: {
         getTaggedNodes(figma.currentPage.selection).forEach((node) => {
             node.setSharedPluginData("fractyl", "dynamic", "");
         });
-    }
-
-    else if (msg.type === "rasterize-static") {
-        figma.currentPage.selection.forEach(async node => {
-            const statics = await exportRasterizedStaticElements(node);
-            figma.ui.postMessage({ type: "static-rendered", files: statics.files });
-        })
-    }
-
-    else if (msg.type === "export-dynamic-template") {
-        figma.currentPage.selection.forEach(async node => {
-            const fragments = await exportDynamicFragments(node);
-            figma.ui.postMessage({ type: "dynamic-export", files: fragments.files });
-        })
     }
 
     else if (msg.type === "complete-export") {

@@ -6,6 +6,7 @@ import { ImageFragmentSchema } from "../../../shared/schema-types";
 export default function exportImageFragments(
     masterNode: SceneNode,
     rectNodes: RectangleNode[],
+    parentDir: string,
 ): { svgCode: string; schema: ImageFragmentSchema }[] {
     const imageSvgFragments: { svgCode: string, schema: ImageFragmentSchema }[] = [];
 
@@ -37,7 +38,7 @@ export default function exportImageFragments(
                         </svg> `,
                         schema: {
                             placeholders: [`${nodeId}#href`],
-                            src: `images/${nodeId}-${i}.svg`,
+                            src: `${parentDir}/images/${nodeId}-${i}.svg`,
                             position: {
                                 x: Math.round(masterRelativeX),
                                 y: Math.round(masterRelativeY)

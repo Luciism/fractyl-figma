@@ -1,23 +1,43 @@
 import JSZip from "jszip";
-import generateSchema from "../schema";
+import generateSchema, { generateLayoutSchema } from "../schema";
 import exportDynamicFragments from "./dynamic";
 import exportRasterizedStaticElements from "./static";
+import { getExportSettings } from "../exportSettings";
+import { aggregateExportVariables } from "../../shared/variables";
+
 
 export default async function completeExport(masterNode: SceneNode) {
+    const exportSettings = getExportSettings();
+    await aggregateExportVariables(exportSettings.includedVariables);
+
+    const layoutSchemas = await Promise.all(exportSettings.scales.map(async (scale, i) => {
+        const fragments = await exportDynamicFragments(masterNode, scale);
+        const statics = await exportRasterizedStaticElements(masterNode, scale);
+
+        return {schema: generateLayoutSchema({id: i, scale: {
+            id: scale.id,
+            name: scale.name,
+            isDefault: scale.isDefault,
+            scale: scale.scale
+        },
+            ...statics.schemas,
+            ...fragments.schemas
+        }), files: [...fragments.files, ...statics.files]};
+    }));
+
+    const schema = generateSchema({
+        name: masterNode.name,
+        layouts: layoutSchemas.map(layout => layout.schema),
+        variables: await aggregateExportVariables(exportSettings.includedVariables)}
+    ); // TODO: variables
+
     const zip = new JSZip();
-
-    const fragments = await exportDynamicFragments(masterNode);
-    const statics = await exportRasterizedStaticElements(masterNode);
-
-    const schema = generateSchema({...statics.schemas, ...fragments.schemas});
     zip.file("schema.json", JSON.stringify(schema))
 
-    fragments.files.forEach(file => {
-        zip.file(file.filename, file.file);
-    });
-
-    statics.files.forEach(file => {
-        zip.file(file.filename, file.file);
+    layoutSchemas.forEach(layout => {
+        layout.files.forEach(file => {
+            zip.file(file.filename, file.file);
+        });
     });
 
     if (typeof setImmediate === "undefined") {

@@ -3,13 +3,14 @@ import {
   RasterSizeSchema,
   StaticBaseSchema,
 } from "../../shared/schema-types.ts";
+import { ScaleExportSetting } from "../../shared/types.ts";
 import { getNodeId } from "../ids.ts";
 import { isStyleableNode } from "../nodes.ts";
 import getTaggedNodes from "../tagging.ts";
 import { changeNodeFillOpacity } from "./color.ts";
 
 /** Requires rasterizeOpaque() to be called beforehand. */
-async function rasterizeTranslucent(clone: FrameNode) {
+async function rasterizeTranslucent(clone: FrameNode, parentDir: string) {
   // Recursively traverses frames to find the first one with a fill.
   // This sets the opacity of each tile
   const recursivelyUnfillBaseFrame = (node: SceneNode) => {
@@ -31,7 +32,7 @@ async function rasterizeTranslucent(clone: FrameNode) {
   };
   recursivelyUnfillBaseFrame(clone);
 
-  const filename = `${clone.name}-static-translucent.png`
+  const filename = `${parentDir}/${clone.name}-static-translucent.png`
     .replace(/\s+/g, "-")
     .toLowerCase();
   const file = await clone.exportAsync({ format: "PNG" });
@@ -39,7 +40,7 @@ async function rasterizeTranslucent(clone: FrameNode) {
   return { filename, file };
 }
 
-async function rasterizeOpaque(clone: FrameNode) {
+async function rasterizeOpaque(clone: FrameNode, parentDir: string) {
   const taggedNodes = getTaggedNodes([clone]);
 
   taggedNodes.forEach((taggedNode) => {
@@ -48,7 +49,7 @@ async function rasterizeOpaque(clone: FrameNode) {
     }
   });
 
-  const filename = `${clone.name}-static.png`
+  const filename = `${parentDir}/${clone.name}-static.png`
     .replace(/\s+/g, "-")
     .toLowerCase();
   const file = await clone.exportAsync({ format: "PNG" });
@@ -56,10 +57,7 @@ async function rasterizeOpaque(clone: FrameNode) {
   return { filename, file };
 }
 
-async function rasterizeMask(clone: FrameNode) {
-  clone.x = 0;
-  clone.y = 10000;
-
+async function rasterizeMask(clone: FrameNode, parentDir: string, scale: ScaleExportSetting) {
   const bounds = clone.absoluteRenderBounds;
   const [absoluteWidth, absoluteHeight] = bounds
     ? [bounds.width, bounds.height]
@@ -119,21 +117,23 @@ async function rasterizeMask(clone: FrameNode) {
     clone.paddingBottom += offset;
   }
 
-    clone.resize(absoluteWidth, absoluteHeight);
-    clone.primaryAxisAlignItems = "CENTER";
-    clone.counterAxisAlignItems = "CENTER";
+  clone.resize(absoluteWidth, absoluteHeight);
+  clone.primaryAxisAlignItems = "CENTER";
+  clone.counterAxisAlignItems = "CENTER";
+
+  clone.rescale(scale.scale);
 
 
-  const filename = `${clone.name}-mask.png`.replace(/\s+/g, "-").toLowerCase();
+  const filename = `${parentDir}/${clone.name}-mask.png`.replace(/\s+/g, "-").toLowerCase();
   const file = await clone.exportAsync({ format: "PNG" });
-
-  clone.remove();
 
   return { filename, file };
 }
 
+
 export default async function exportRasterizedStaticElements(
   node: SceneNode,
+  scale: ScaleExportSetting
 ): Promise<{
   schemas: {
     name: string;
@@ -148,6 +148,9 @@ export default async function exportRasterizedStaticElements(
   }
 
   const clone = node.clone();
+  clone.x = 0;
+  clone.y = 10000;
+  clone.rescale(scale.scale);
 
   let rasterSize: RasterSizeSchema = {
     width: Math.round(clone.width),
@@ -160,25 +163,37 @@ export default async function exportRasterizedStaticElements(
     rasterY: 0,
   };
 
-  const box = clone.absoluteRenderBounds;
+  // absoluteRenderBounds on scaled nodes acts strangely, scale it manually
+  const nodeBox = node.absoluteRenderBounds;
+  const cloneBox = clone.absoluteRenderBounds;
 
-  if (box) {
+  if (nodeBox && cloneBox) {
+    const box = {
+        width: nodeBox.width * scale.scale,
+        height: nodeBox.height * scale.scale,
+        x: cloneBox.x,
+        y: cloneBox.y
+    };
     rasterSize = {
       width: Math.round(box.width),
       height: Math.round(box.height),
     };
-    contentBox.rasterX = Math.round(clone.x - box.x);
-    contentBox.rasterY = Math.round(clone.y - box.y);
+    contentBox.rasterX = Math.round((clone.x - box.x) * scale.scale);
+    contentBox.rasterY = Math.round((clone.y - box.y) * scale.scale);
   }
 
-  clone.x = 0;
-  clone.y = 10000;
 
-  const opaque = await rasterizeOpaque(clone);
-  const translucent = await rasterizeTranslucent(clone);
-  const mask = await rasterizeMask(node.clone());
+  const parentDir = scale.name;
+  const opaque = await rasterizeOpaque(clone, parentDir);
+  const translucent = await rasterizeTranslucent(clone, parentDir);
+
+  const clone2 = node.clone();
+  clone2.x = 0;
+  clone2.y = 10000;
+  const mask = await rasterizeMask(clone2, parentDir, scale);
 
   clone.remove();
+  clone2.remove();
 
   const files = [opaque, translucent, mask];
 
@@ -188,9 +203,11 @@ export default async function exportRasterizedStaticElements(
       contentBox,
       rasterSize,
       staticBase: {
-        opaque: opaque.filename,
-        translucent: translucent.filename,
-        mask: mask.filename,
+        default: opaque.filename,
+        background: {
+          translucent: translucent.filename,
+          mask: mask.filename,
+        }
       },
     },
     files,

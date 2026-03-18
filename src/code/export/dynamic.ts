@@ -3,12 +3,13 @@ import {
     ShapeFragmentSchema,
     TextFragmentSchema,
 } from "../../shared/schema-types.ts";
-import { NodePluginData } from "../../shared/types.ts";
+import { NodePluginData, ScaleExportSetting } from "../../shared/types.ts";
 import {
     getColorMode,
     getShapeHeightMode,
     getShapeWidthMode,
 } from "../modes.ts";
+import { isScalableNode } from "../nodes.ts";
 import getTaggedNodes from "../tagging.ts";
 import { recursivelyRemoveStaticColors } from "./color.ts";
 import exportImageFragments from "./dynamic/images.ts";
@@ -16,7 +17,7 @@ import { getShouldClipToParent } from "./dynamic/shapes/clipping.ts";
 import { rectangleToSVG } from "./dynamic/shapes/rect.ts";
 import exportTextFragments from "./dynamic/text.ts";
 
-function exportShapes(masterNode: SceneNode, taggedNodes: SceneNode[]) {
+function exportShapes(masterNode: SceneNode, taggedNodes: SceneNode[], parentDir: string) {
     const shapeFragmentSvgs: {
         svgCode: string;
         pluginData: NodePluginData;
@@ -60,7 +61,7 @@ function exportShapes(masterNode: SceneNode, taggedNodes: SceneNode[]) {
                 }
 
                 const schema = {
-                    src: `shapes/rect-${i}.svg`,
+                    src: `${parentDir}/shapes/rect-${i}.svg`,
                     widthMode: getShapeWidthMode(node),
                     heightMode: getShapeHeightMode(node),
                     colorMode: getColorMode(node),
@@ -77,6 +78,7 @@ function exportShapes(masterNode: SceneNode, taggedNodes: SceneNode[]) {
 
 export default async function exportDynamicFragments(
     node: SceneNode,
+    scale: ScaleExportSetting
 ): Promise<{
     schemas: {
         textFragments: TextFragmentSchema[];
@@ -85,21 +87,30 @@ export default async function exportDynamicFragments(
     };
     files: { filename: string; type: string; file: string | Uint8Array }[];
 }> {
+    if (!isScalableNode(node)) {
+        throw new Error("Master node must be a frame.");
+    }
+
     const clone = node.clone();
+    clone.rescale(scale.scale);
 
     const taggedNodes = getTaggedNodes([clone]);
     recursivelyRemoveStaticColors(taggedNodes, clone);
 
+    const parentDir = scale.name;
+
     const textFragments = exportTextFragments(
         clone,
         taggedNodes.filter((node) => node.type == "TEXT"),
+        parentDir
     );
     const imageFragments = exportImageFragments(
         clone,
         taggedNodes.filter((node) => node.type == "RECTANGLE"),
+        parentDir
     );
 
-    const shapeFragments = exportShapes(clone, taggedNodes);
+    const shapeFragments = exportShapes(clone, taggedNodes, parentDir);
 
     clone.remove();
 

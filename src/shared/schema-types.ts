@@ -37,10 +37,14 @@ export type ContentBoxSchema = {
     height: number;
 }
 
-export type StaticBaseSchema = {
-    opaque: string;
+export type StaticBaseBackgroundSchema = {
     translucent: string;
     mask: string;
+};
+
+export type StaticBaseSchema = {
+    default: string;
+    background: StaticBaseBackgroundSchema;
 }
 
 export type FragmentsSchema = {
@@ -49,12 +53,32 @@ export type FragmentsSchema = {
     shapes: ShapeFragmentSchema[];
 }
 
-export type FractylExportSchema = {
-    schemaVersion: number;
-    id: string,
+export type ScaleSchema = {
+    id: number;
     name: string;
+    isDefault: boolean;
+    scale: number;
+}
+
+export type LayoutSchema = {
+    id: number;
+    scale: ScaleSchema;
     rasterSize: RasterSizeSchema;
     contentBox: ContentBoxSchema;
     staticBase: StaticBaseSchema;
     fragments: FragmentsSchema;
 }
+
+export type VariableSchema = {
+    name: string;
+    value: string;
+}
+
+export type FractylExportSchema = {
+    schemaVersion: number;
+    id: string,
+    name: string;
+    variables: VariableSchema[];
+    layouts: LayoutSchema[]
+}
+

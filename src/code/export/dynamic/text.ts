@@ -169,6 +169,7 @@ export function buildTextSvgElement(
 export default function exportTextFragments(
     masterNode: SceneNode,
     textNodes: TextNode[],
+    parentDir: string
 ): { svgCode: string; schema: TextFragmentSchema } {
     const textSvgs: string[] = [];
     const defs: string[] = [];
@@ -208,7 +209,7 @@ export default function exportTextFragments(
             { lineSeparator: "\n" },
         ),
         schema: {
-            src: "text/text-fragments.svg",
+            src: `${parentDir}/text/text-fragments.svg`,
             placeholders,
             position: {
                 x: 0,
