@@ -1,0 +1,83 @@
+.export-scale-container {
+  display: flex;
+  align-items: center;
+
+  & .scale-name-input {
+    width: 100%;
+  }
+
+  & .scale-value-input {
+    width: 60px;
+    margin-inline: 2px;
+  }
+
+  & .delete-scale-button {
+    width: 50px;
+    padding-inline: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-danger);
+
+    &:disabled {
+      color: lightgray;
+      background-color: gray;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.add-export-setting-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  font-size: 14px;
+
+  & .icon {
+    font-size: 12px;
+  }
+}
+
+.included-variables-list {
+  max-height: 100px;
+  overflow-y: scroll;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  & li {
+    position: relative;
+    font-size: 14px;
+    margin-left: 8px;
+
+    --blockquote-radius: 10px;
+    
+    &:first-child {
+      &::before {
+        border-top-left-radius: var(--blockquote-radius);
+        border-top-right-radius: var(--blockquote-radius);
+      }
+    }
+
+    &:last-child {
+      &::before {
+        border-bottom-left-radius: var(--blockquote-radius);
+        border-bottom-right-radius: var(--blockquote-radius);
+      }
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: -8px;
+      top: 0;
+      height: 100%;
+      width: 3px;
+      background-color: var(--accent-color);
+
+
+    }
+  }
+}

@@ -4,7 +4,7 @@
   "description": "Your Figma Plugin",
   "main": "code.js",
   "scripts": {
-    "build": "npm run buildcode && npm run buildui",
+    "build": "npm run buildui && npm run buildcode",
     "buildcode": "esbuild src/code/index.ts --bundle --outfile=dist/index.js --target=es6",
     "buildui": "vite build",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",

@@ -9,7 +9,7 @@ export default function exportImageFragments(
 ): { svgCode: string; schema: ImageFragmentSchema }[] {
     const imageSvgFragments: { svgCode: string, schema: ImageFragmentSchema }[] = [];
 
-    rectNodes.forEach(async (node) => {
+    rectNodes.forEach(async (node, i) => {
         if (typeof node.fills !== "symbol" && node.visible && node.opacity) {
             const fill = node.fills[0];
 
@@ -37,7 +37,7 @@ export default function exportImageFragments(
                         </svg> `,
                         schema: {
                             placeholders: [`${nodeId}#href`],
-                            src: `images/${nodeId}-${Math.floor(Math.random() * 10000)}.svg`,
+                            src: `images/${nodeId}-${i}.svg`,
                             position: {
                                 x: Math.round(masterRelativeX),
                                 y: Math.round(masterRelativeY)

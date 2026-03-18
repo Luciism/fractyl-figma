@@ -4,28 +4,29 @@ import { setNodeId } from "./ids.ts";
 import getTaggedNodes, { setNodeTag } from "./tagging.ts";
 import "./selection.ts";
 import { isShapeNode, isTextNode } from "./nodes.ts";
-import { FractylImageNodeData, FractylShapeNodeData, FractylTextNodeData, isNodeTagType } from "../shared/types.ts";
+import { FractylImageNodeData, FractylShapeNodeData, FractylTextNodeData, isNodeTagType, UpdateGlobalExportSettings } from "../shared/types.ts";
 import { setColorMode, setShapeHeightMode, setShapeWidthMode } from "./modes.ts";
 import completeExport from "./export/all.ts";
 import { setShouldClipToParent } from "./export/dynamic/shapes/clipping.ts";
 import { setShouldColorMatchShadow } from "./shadows.ts";
+import { getExportSettings, updateExportSettings } from "./exportSettings.ts";
 
 figma.showUI(__html__, { width: 420, height: 520 });
 
-type Handler = (msg: { [key: string]: unknown }) => void;
+export type Handler = (msg: { [key: string]: unknown }) => void;
 
-class MessageHandlers{
-    handlers: {msg_type: string, handler: Handler}[]
+class MessageHandlers {
+    handlers: { msg_type: string, handler: Handler }[]
 
     constructor() {
         this.handlers = [];
     }
 
     public addHandler(msg_type: string, handler: Handler): void {
-        this.handlers.push({msg_type, handler});
+        this.handlers.push({ msg_type, handler });
     }
 
-    public handle(msg: {type: string}) {
+    public handle(msg: { type: string }) {
         const handlers = this.handlers.filter(handler => handler.msg_type == msg.type);
 
         handlers.forEach(handler => {
@@ -36,7 +37,7 @@ class MessageHandlers{
 
 export const messageHandlers = new MessageHandlers()
 
-messageHandlers.addHandler("tag-selection", ((msg: {type: string, tag: string}) => {
+messageHandlers.addHandler("tag-selection", ((msg: { type: string, tag: string }) => {
     const items = figma.currentPage.selection;
 
     items.forEach((item) => {
@@ -45,6 +46,55 @@ messageHandlers.addHandler("tag-selection", ((msg: {type: string, tag: string}) 
         }
     });
 }) as Handler)
+
+messageHandlers.addHandler("get-variables", (async (_) => {
+    const collections = await figma.variables.getLocalVariableCollectionsAsync()
+
+    const aggregatedCollections = (await Promise.all(collections.map(async collection => {
+        return {
+            id: collection.id,
+            name: collection.name,
+            key: collection.key,
+            variables:
+                (await Promise.all(collection.variableIds.map(async variableId => {
+                    const variable = await figma.variables.getVariableByIdAsync(variableId);
+                    if (!variable) {
+                        return null;
+                    }
+
+                    return {
+                        id: variable.id,
+                        name: variable.name,
+                        key: variable.key,
+                        description: variable.description,
+                        variableCollectionId: variable.variableCollectionId,
+                        resolvedType: variable.resolvedType,
+                        valuesByMode: variable.valuesByMode
+                    };
+                }).filter(v => v !== null)))
+
+        }
+    })));
+
+    figma.ui.postMessage({
+        type: "get-variables",
+        collections: aggregatedCollections,
+    });
+}) as Handler)
+
+messageHandlers.addHandler("get-export-settings", (async (_) => {
+    figma.ui.postMessage({
+        type: "get-export-settings",
+        exportSettings: getExportSettings()
+    });
+}) as Handler)
+
+messageHandlers.addHandler("update-export-settings", ( (
+    msg: { exportSettings: UpdateGlobalExportSettings }
+) => {
+    updateExportSettings(msg.exportSettings);
+}) as Handler)
+
 
 figma.ui.onmessage = (msg: {
     type: string;
@@ -80,14 +130,14 @@ figma.ui.onmessage = (msg: {
     else if (msg.type === "rasterize-static") {
         figma.currentPage.selection.forEach(async node => {
             const statics = await exportRasterizedStaticElements(node);
-            figma.ui.postMessage({type: "static-rendered", files: statics.files});
+            figma.ui.postMessage({ type: "static-rendered", files: statics.files });
         })
     }
 
     else if (msg.type === "export-dynamic-template") {
         figma.currentPage.selection.forEach(async node => {
             const fragments = await exportDynamicFragments(node);
-            figma.ui.postMessage({type: "dynamic-export", files: fragments.files});
+            figma.ui.postMessage({ type: "dynamic-export", files: fragments.files });
         })
     }
 
@@ -138,7 +188,7 @@ figma.ui.onmessage = (msg: {
             figma.currentPage.selection.forEach(node => {
                 if (isTextNode(node)) {
                     setNodeId(node, textNodeData.id);
-                    setNodeTag(node, "text");
+                    setNodeTag(node, textNodeData.id ? "text" : null);
                     setColorMode(node, textNodeData.attributes.colorMode);
                     setShouldColorMatchShadow(node, textNodeData.attributes.shouldColorMatchShadow);
                 } else {

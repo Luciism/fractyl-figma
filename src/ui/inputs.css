@@ -71,7 +71,7 @@ form {
     padding-inline: 6px 40px;
   }
 
-  input[type="text"] {
+  input[type="text"], input[type="number"] {
     padding-inline: 10px;
   }
 

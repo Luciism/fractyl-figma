@@ -1,0 +1,70 @@
+.variable-selector-container {
+  position: fixed;
+  inset: 20px;
+  display: flex;
+  flex-direction: column;
+  /* overflow-y: scroll; */
+
+  background-color: var(--background-color);
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid rgb(255 255 255 / 0.25);
+
+  & .popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 50px;
+    max-height: 50px;
+
+    & .close-icon {
+      cursor: pointer;
+    }
+
+    & h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+  }
+
+  & .popover-content {
+    height: auto;
+    overflow-y: scroll;
+  }
+
+
+
+  & .collection-selection {
+    & .selection-input-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px dotted rgb(255 255 255 / 0.25);
+      width: auto;
+
+      &.included {
+        & label {
+          color: #FFFFFF;
+        }
+      }
+    }
+
+    & label {
+      font-size: 14px;
+      margin-block: 2px;
+      color: #AAAAAA;
+    }
+
+    & input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-left: auto;
+    }
+
+    & .variable-selection {
+      margin-left: 18px;
+    }
+  }
+}

@@ -9,7 +9,7 @@ import { generateColorMatchedShadow, generateFixedShadow } from "./shadow.ts";
 
 const FALLBACKFONTFAMILY = "Inter, Arial, system-ui";
 
-function hashString(str: string) {
+export function hashString(str: string) {
     let hash = 0,
         i, chr;
     if (str.length === 0) return hash;
@@ -128,7 +128,7 @@ export function buildTextSvgElement(
     const colorMatchShadow = getShouldColorMatchShadow(textNode);
 
     let defs = shadows.length ? (
-        colorMatchShadow 
+        colorMatchShadow
             ? generateColorMatchedShadow(shadows[0])
             : generateFixedShadow(shadows)
     ) : null;
@@ -175,7 +175,13 @@ export default function exportTextFragments(
     let placeholders: string[] = [];
 
     textNodes.forEach((textNode) => {
-        if (!textNode.visible || !textNode.opacity || !textNode.characters) {
+        if (
+            !textNode.absoluteRenderBounds
+            || !textNode.visible
+            || !textNode.opacity
+            || !textNode.characters
+            || getNodeId(textNode) == null
+        ) {
             return;
         }
 
@@ -191,7 +197,7 @@ export default function exportTextFragments(
     const deDupedDefs = [...new Set(defs)];
 
     return {
-        svgCode: xmlFormat( `
+        svgCode: xmlFormat(`
         ${svgOpeningTag(masterNode)}
         <defs>
             ${deDupedDefs.join("\n")}

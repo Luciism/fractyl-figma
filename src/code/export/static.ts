@@ -3,6 +3,7 @@ import {
   RasterSizeSchema,
   StaticBaseSchema,
 } from "../../shared/schema-types.ts";
+import { getNodeId } from "../ids.ts";
 import { isStyleableNode } from "../nodes.ts";
 import getTaggedNodes from "../tagging.ts";
 import { changeNodeFillOpacity } from "./color.ts";
@@ -42,7 +43,7 @@ async function rasterizeOpaque(clone: FrameNode) {
   const taggedNodes = getTaggedNodes([clone]);
 
   taggedNodes.forEach((taggedNode) => {
-    if (isStyleableNode(taggedNode)) {
+    if (isStyleableNode(taggedNode) && getNodeId(taggedNode) != null) {
       taggedNode.opacity = 0;
     }
   });

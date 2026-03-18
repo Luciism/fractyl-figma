@@ -4,7 +4,6 @@ import {
     TextFragmentSchema,
 } from "../../shared/schema-types.ts";
 import { NodePluginData } from "../../shared/types.ts";
-import { getNodeId } from "../ids.ts";
 import {
     getColorMode,
     getShapeHeightMode,
@@ -26,7 +25,11 @@ function exportShapes(masterNode: SceneNode, taggedNodes: SceneNode[]) {
 
     taggedNodes
         .filter((node) => node.type == "RECTANGLE")
-        .forEach((node) => {
+        .forEach((node, i) => {
+            if ( !node.absoluteRenderBounds || !node.visible || !node.opacity) {
+                return;
+            }
+
             if (
                 typeof node.fills != "symbol" &&
                 node.fills[0] &&
@@ -56,9 +59,8 @@ function exportShapes(masterNode: SceneNode, taggedNodes: SceneNode[]) {
                     y = Math.round(box.y - masterNode.y);
                 }
 
-                const id = getNodeId(node) || Math.round(Math.random() * 10000);
                 const schema = {
-                    src: `shapes/rect-${id}.svg`,
+                    src: `shapes/rect-${i}.svg`,
                     widthMode: getShapeWidthMode(node),
                     heightMode: getShapeHeightMode(node),
                     colorMode: getColorMode(node),

@@ -72,3 +72,49 @@ export type SvgFragmentExport = {
     pluginData: NodePluginData;
 }
 
+export type ScaleExportSetting = {
+    id: number;
+    name: string;
+    scale: number;
+    isDefault: boolean;
+}
+
+export type VariableExportSetting = {
+    /** Complete collections of variables to include */
+    collectionIds: string[];
+    /** Additional independent variables that aren't included in a complete collection. */
+    variableIds: string[];
+}
+
+export type GlobalExportSettings = {
+    includedVariables: VariableExportSetting;
+    scales: ScaleExportSetting[];
+}
+
+export type UpdateGlobalExportSettings = {
+    includesVariables?: VariableExportSetting;
+    scales?: ScaleExportSetting[];
+}
+
+
+
+type VariableResolvedDataType = 'BOOLEAN' | 'COLOR' | 'FLOAT' | 'STRING'
+type VariableValue = boolean | string | number | RGB | RGBA | VariableAlias;
+export type Variable = {
+    id: string;
+    name: string;
+    key: string;
+    description: string;
+    variableCollectionId: string;
+    resolvedType: VariableResolvedDataType;
+    valuesByMode: {
+        [modeId: string]: VariableValue
+    };
+}
+
+export type VariableCollection = {
+    id: string;
+    name: string;
+    key: string;
+    variables: Variable[];
+}
