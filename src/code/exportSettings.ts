@@ -3,7 +3,7 @@ import { GlobalExportSettings, UpdateGlobalExportSettings } from "../shared/type
 export function defaultExportSettings(): GlobalExportSettings {
     return {
         includedVariables: {collectionIds: [], variableIds: []},
-        scales: [{ id: 0, name: "regular", scale: 1.0, isDefault: true }]
+        scales: [{ id: 0, name: "regular", scale: 1.0, isDefault: true, isEnabled: true }]
     }
 }
 
@@ -33,6 +33,10 @@ export function getExportSettings(): GlobalExportSettings {
 
 export function updateExportSettings(exportSettings: UpdateGlobalExportSettings) {
     const existingSettings = getExportSettings();
+
+    if (exportSettings.scales) {
+        exportSettings.scales = exportSettings.scales.sort((a, b) => a.scale - b.scale);
+    }
 
     figma.root.setSharedPluginData("fractyl", "exportSettings", JSON.stringify({
         ...existingSettings,

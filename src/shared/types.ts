@@ -76,6 +76,7 @@ export type ScaleExportSetting = {
     id: number;
     name: string;
     scale: number;
+    isEnabled: boolean;
     isDefault: boolean;
 }
 

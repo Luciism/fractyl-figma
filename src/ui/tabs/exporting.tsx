@@ -22,15 +22,26 @@ function downloadBlob(blob: Blob, filename: string) {
 
 function ExportScaleSetting({ scale, updateScale, deleteScale }: {
     scale: ScaleExportSetting,
-    updateScale: (id: number, name: string, value: number) => void,
+    updateScale: (id: number, name: string, value: number, isEnabled: boolean) => void,
     deleteScale: (id: number) => void
 }
 ) {
     const [name, setName] = useState(scale.name);
     const [scaleValue, setScaleValue] = useState(scale.scale);
+    const [isEnabled, setIsEnabled] = useState(scale.isEnabled);
 
     return (
-        <div className="export-scale-container">
+        <div className={`export-scale-container ${!isEnabled && !scale.isDefault ? "disabled": ""}`}>
+            <input
+                className="scale-enabled-checkbox"
+                type="checkbox"
+                checked={isEnabled || scale.isDefault}
+                onChange={(e) => {
+                    setIsEnabled(e.target.checked);
+                    updateScale(scale.id, name, scaleValue, e.target.checked);
+                }}
+                disabled={scale.isDefault}
+            />
             <input
                 type="text"
                 className="scale-name-input"
@@ -39,13 +50,13 @@ function ExportScaleSetting({ scale, updateScale, deleteScale }: {
                 onChange={(e) => {
                     setName(e.target.value.toLowerCase().replace(" ", "-"));
                 }}
-                onBlur={() => updateScale(scale.id, name, scaleValue)}
+                onBlur={() => updateScale(scale.id, name, scaleValue, isEnabled)}
             />
             <input
                 type="text"
                 className="scale-value-input"
                 value={scaleValue + "x"}
-                onBlur={() => updateScale(scale.id, name, scaleValue)}
+                onBlur={() => updateScale(scale.id, name, scaleValue, isEnabled)}
                 onKeyDown={(e) => {
                     if (e.key == "Backspace") {
                         e.preventDefault();
@@ -112,7 +123,7 @@ export default function ExportingTab({
 }) {
     // Export settings
     const [scales, setScales] = useState<ScaleExportSetting[]>(
-        [{ id: 0, name: "regular", scale: 1.0, isDefault: true }]
+        [{ id: 0, name: "regular", scale: 1.0, isDefault: true, isEnabled: true }]
     );
     const [includedVariables, setIncludedVariables] = useState<VariableExportSetting>(
         {variableIds: [], collectionIds: []}
@@ -169,10 +180,10 @@ export default function ExportingTab({
         return () => window.removeEventListener("message", onMessage);
     }, []);
 
-    const updateScale = (id: number, name: string, value: number) => {
+    const updateScale = (id: number, name: string, value: number, isEnabled: boolean) => {
         const updatedScales = scales.map(scale => {
             if (scale.id === id) {
-                return { ...scale, name, scale: value };
+                return { ...scale, name, scale: value, isEnabled };
             }
             return scale;
         });
@@ -198,7 +209,8 @@ export default function ExportingTab({
             id: scales.length + 1,
             name: `scale${scales.length + 1}`,
             scale: 1.0,
-            isDefault: false
+            isDefault: false,
+            isEnabled: true
         }];
         setScales(updatedScales);
         parent.postMessage(
@@ -241,7 +253,7 @@ export default function ExportingTab({
 
                         <label htmlFor="add-scale-button">Scales</label>
 
-                        {scales.sort((a, b) => a.scale - b.scale).map(scale => <ExportScaleSetting
+                        {scales.map(scale => <ExportScaleSetting
                             scale={scale}
                             key={scale.name}
                             updateScale={updateScale}
