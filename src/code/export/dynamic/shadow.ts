@@ -17,7 +17,7 @@ export function generateFixedShadow(shadows: DropShadowEffect[]) {
 
 export function generateColorMatchedShadow(shadow: DropShadowEffect) {
     return `
-        <filter id="{SHADOW_ID}">
+        <filter id="{SHADOW_ID}" color-interpolation-filters="sRGB">
           <!-- Offset the colored text -->
           <feOffset dx="${shadow.offset.x}" dy="${shadow.offset.y}" in="SourceGraphic" result="offsetColor"/>
           <!-- Blur it -->
