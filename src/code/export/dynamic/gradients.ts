@@ -1,6 +1,31 @@
 import { ModeAttribute } from "../../../shared/types";
 
-export function createLinearGradient(fill: GradientPaint, id: string, nodeId: string | null, colorMode: ModeAttribute): {gradient: string, placeholders: string[]} {
+function calculateGradientPositions(transform: Transform, invertX?: boolean, invertY?: boolean): {x1: number, y1: number, x2: number, y2: number} {
+    const [[a, b, tx], [c, d, ty]] = transform;
+
+    const det = a * d - b * c;
+
+    const invA =  d / det;
+    const invB = -c / det;  // note: -c not -b
+    const invE = (b * ty - d * tx) / det;
+    const invF = (c * tx - a * ty) / det;
+
+    return {
+      x1: invertX ? 1 - invE : invE,
+      y1: invertY ? 1 - invF : invF,
+      x2: invertX ? 1 - (invA + invE) : invA + invE,
+      y2: invertY ? 1 - (invB + invF) : invB + invF,
+    };
+}
+
+export function createLinearGradient(
+    fill: GradientPaint,
+    id: string,
+    nodeId: string | null,
+    colorMode: ModeAttribute,
+    invertX?: boolean,
+    invertY?: boolean
+): {gradient: string, placeholders: string[]} {
     const placeholders: string[] = [];
 
     const stops = fill.gradientStops.map((stop, i) => {
@@ -11,24 +36,20 @@ export function createLinearGradient(fill: GradientPaint, id: string, nodeId: st
 
         const { r, g, b } = stop.color;
         const a = stop.color.a !== undefined ? stop.color.a : 1;
-        return `<stop offset="${stop.position}" stop-color="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})" />`;
+        return `<stop offset="${stop.position}" stop-color="rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})" stop-opacity="${fill.opacity}" />`;
     }).join('');
 
-    // Figma's gradientTransform is a 3x2 affine matrix: [[a, b, tx], [c, d, ty]]
-    // It transforms normalized coordinates (0-1) to shape coordinates
-    // The gradient starts at (0, 0.5) and ends at (1, 0.5) in normalized space
-    const [[a, b, tx], [c, d, ty]] = fill.gradientTransform;
 
-    // Apply transform to start point (0, 0.5) in normalized space
-    const x1 = a * 0 + b * 0.5 + tx;
-    const y1 = c * 0 + d * 0.5 + ty;
+    const {x1, y1, x2, y2} = calculateGradientPositions(fill.gradientTransform, invertX, invertY);
 
-    // Apply transform to end point (1, 0.5) in normalized space
-    const x2 = a * 1 + b * 0.5 + tx;
-    const y2 = c * 1 + d * 0.5 + ty;
-
-
-    const gradient = `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="objectBoundingBox">
+    const gradient = `<linearGradient
+        id="${id}"
+        x1="${x1}"
+        y1="${y1}"
+        x2="${x2}"
+        y2="${y2}"
+        gradientUnits="objectBoundingBox"
+    >
     ${stops}
   </linearGradient>`;
     return {gradient, placeholders};

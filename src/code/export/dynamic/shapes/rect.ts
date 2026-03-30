@@ -28,6 +28,47 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
     let strokeWidth = 0;
     let placeholders: string[] = [];
 
+    let widthAttr: string;
+    if (widthMode == "dynamic" && nodeId) {
+        widthAttr = `{${nodeId}#width}`;
+        placeholders.push(`${nodeId}#width`);
+    } else {
+        widthAttr = width.toString();
+    }
+
+    let heightAttr: string;
+    if (heightMode == "dynamic" && nodeId) {
+        heightAttr = `{${nodeId}#height}`;
+        placeholders.push(`${nodeId}#height`);
+    } else {
+        heightAttr = height.toString();
+    }
+
+    let parent = node.parent;
+    if (parent && parent.type != "FRAME" && parent.type != "INSTANCE") {
+        parent = null;
+    }
+    
+    let x = (parent && shouldClipToParent ? node.x : 0).toString();
+    let y = (parent && shouldClipToParent ? node.y : 0).toString();
+    let invertX = false;
+    let invertY = false;
+    let styleAttr = "";
+
+    // If the parent has autolayout and we're clipping to the parent, adjust the position
+    // so that the anchor point is appropriate.
+    if (parent && shouldClipToParent) {
+        if (heightMode == "dynamic" && parent.layoutMode == "HORIZONTAL" && parent.counterAxisAlignItems == "MAX") {
+            y = "100%";
+            invertY = true;
+            styleAttr = `style="transform: matrix(1, 0, 0, -1, 0, 0); transform-origin: center bottom;"`;
+        } else if (widthMode == "dynamic" && parent.layoutMode == "VERTICAL" && parent.counterAxisAlignItems == "MAX") {
+            // x = "100%";
+            // invertX = true;
+            // styleAttr = `style="transform: matrix(-1, 0, 0, 1, 0, 0); transform-origin: right center;"`;
+        }
+    }
+
     // Handle fills
     if (node.fills && typeof node.fills !== "symbol" && node.fills.length > 0) {
         const fill = node.fills[0];
@@ -44,7 +85,7 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
         }
         else if (fill.type === 'GRADIENT_LINEAR' && fill.visible !== false) {
             const gradientId = `gradient-${Math.random().toString(36).substring(2, 9)}`;
-            const { gradient, placeholders: gradientPlaceholders } = createLinearGradient(fill, gradientId, nodeId, colorMode);
+            const { gradient, placeholders: gradientPlaceholders } = createLinearGradient(fill, gradientId, nodeId, colorMode, invertX, invertY);
             placeholders = placeholders.concat(gradientPlaceholders);
             defs.push(gradient);
             fillAttr = `fill="url(#${gradientId})"`;
@@ -85,35 +126,16 @@ export function rectangleToSVG(node: RectangleNode): SvgFragmentExport {
     // SVG automatically clamps rx to half the smallest dimension for pill shapes
     rx = Math.min(rx, width / 2, height / 2);
 
-    let widthAttr: string;
-    if (widthMode == "dynamic" && nodeId) {
-        widthAttr = `{${nodeId}#width}`;
-        placeholders.push(`${nodeId}#width`);
-    } else {
-        widthAttr = width.toString();
-    }
-
-    let heightAttr: string;
-    if (heightMode == "dynamic" && nodeId) {
-        heightAttr = `{${nodeId}#height}`;
-        placeholders.push(`${nodeId}#height`);
-    } else {
-        heightAttr = height.toString();
-    }
-
-    let parent = node.parent;
-    if (parent && parent.type != "FRAME" && parent.type != "INSTANCE") {
-        parent = null;
-    }
 
     const rectAttrs = [
-        `x="${parent && shouldClipToParent ? node.x : 0}"`,
-        `y="${parent && shouldClipToParent ? node.y : 0}"`,
+        `x="${x}"`,
+        `y="${y}"`,
         `width="${widthAttr}"`,
         `height="${heightAttr}"`,
         rx > 0 ? `rx="${rx}"` : '',
         fillAttr,
-        strokeAttr
+        strokeAttr,
+        styleAttr
     ];
 
     if (shouldColorMatchShadow && shadows.length) {
