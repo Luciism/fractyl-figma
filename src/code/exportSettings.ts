@@ -8,7 +8,7 @@ export function defaultExportSettings(): GlobalExportSettings {
     }
 }
 
-function isExportSettingObject(obj: any): obj is GlobalExportSettings {
+function isExportSettingObject(obj: any): obj is GlobalExportSettings { 
     return (
         obj.includedVariables?.collectionIds !== undefined
         && typeof obj.includedVariables.collectionIds.length === "number"

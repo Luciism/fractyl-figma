@@ -8,6 +8,7 @@ import completeExport from "./export/all.ts";
 import { setShouldClipToParent } from "./export/dynamic/shapes/clipping.ts";
 import { setShouldColorMatchShadow } from "./shadows.ts";
 import { getExportSettings, updateExportSettings } from "./exportSettings.ts";
+import { getLastActiveTab, setLastActiveTab } from "./lastActiveTab.ts";
 
 figma.showUI(__html__, { width: 420, height: 520 });
 
@@ -93,6 +94,16 @@ messageHandlers.addHandler("update-export-settings", ( (
     updateExportSettings(msg.exportSettings);
 }) as Handler)
 
+messageHandlers.addHandler("get-last-active-tab", ((_) => {
+    figma.ui.postMessage({
+        type: "get-last-active-tab",
+        lastActiveTabId: getLastActiveTab()
+    });
+}) as Handler)
+
+messageHandlers.addHandler("set-last-active-tab", ((msg: {activeTabId: string}) => {
+    setLastActiveTab(msg.activeTabId);
+}) as Handler)
 
 figma.ui.onmessage = (msg: {
     type: string;

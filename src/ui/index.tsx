@@ -62,7 +62,13 @@ function App() {
       if (msg.type === "done") {
         setIsLoading(false);
       }
+
+      if (msg.type === "get-last-active-tab") {
+        setActiveTabId(msg.lastActiveTabId);
+      }
     };
+
+    parent.postMessage( { pluginMessage: { type: "get-last-active-tab"} }, "*");
 
     return () => {
       window.onmessage = null;
@@ -79,7 +85,13 @@ function App() {
             text={tab.button}
             key={tab.id}
             activeTabId={activeTabId}
-            onClick={() => setActiveTabId(tab.id)}
+            onClick={() => {
+                setActiveTabId(tab.id);
+                parent.postMessage(
+                    { pluginMessage: { type: "set-last-active-tab", activeTabId: tab.id } },
+                    "*",
+                );
+            }}
             isDebug={tab.isDebug || false}
           />
         </div>
