@@ -32,11 +32,13 @@ const tabs = [
     button: "Tags",
     Component: TaggingTab,
     dividerLeft: 10,
+    isDebug: true
   },
   {
     id: "ids",
     button: "IDs",
     Component: IdManagementTab,
+    isDebug: true
   },
   {
     id: "exporting",
@@ -78,6 +80,7 @@ function App() {
             key={tab.id}
             activeTabId={activeTabId}
             onClick={() => setActiveTabId(tab.id)}
+            isDebug={tab.isDebug || false}
           />
         </div>
         ))}

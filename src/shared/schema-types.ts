@@ -44,7 +44,7 @@ export type StaticBaseBackgroundSchema = {
 
 export type StaticBaseSchema = {
     default: string;
-    background: StaticBaseBackgroundSchema;
+    background: StaticBaseBackgroundSchema | null;
 }
 
 export type FragmentsSchema = {

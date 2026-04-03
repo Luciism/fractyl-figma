@@ -134,6 +134,9 @@ export default function ExportingTab({
 
     const [variableSelectorOpen, setVariableSelectorOpen] = useState(false);
 
+    const [enableBackgroundVariant, setEnableBackgroundVariant] = useState(true);
+    const [backgroundVariantPassThrough, setBackgroundVariantPassThrough] = useState(0.2);
+
     const executeCompleteExport = () => {
         setLoading(true);
         parent.postMessage(
@@ -158,6 +161,8 @@ export default function ExportingTab({
                 setExportSettings(msg.exportSettings);
                 setScales(msg.exportSettings.scales);
                 setIncludedVariables(msg.exportSettings.includedVariables);
+                setEnableBackgroundVariant(msg.exportSettings.backgroundVariant.enabled);
+                setBackgroundVariantPassThrough(msg.exportSettings.backgroundVariant.passThrough);
                 return;
             }
 
@@ -195,6 +200,18 @@ export default function ExportingTab({
         );
     }
 
+    const updateBackgroundVariant = (enabled: boolean, passThrough: number) => {
+        passThrough = Math.max(0, Math.min(1, passThrough));
+
+        setEnableBackgroundVariant(enabled);
+        setBackgroundVariantPassThrough(passThrough);
+
+        parent.postMessage(
+            { pluginMessage: { type: "update-export-settings", exportSettings: {backgroundVariant: {enabled, passThrough}} } },
+            "*",
+        );
+    }
+
     const deleteScale = (id: number) => {
         const updatedScales = scales.filter(scale => scale.id !== id);
         setScales(updatedScales);
@@ -221,13 +238,17 @@ export default function ExportingTab({
 
     return (
         <>
-            {!exportSettings || !localVariableCollections.length && <div className="tab">Loading...</div>}
+            {!exportSettings || !localVariableCollections.length &&
+                <div className="tab">Loading...</div>
+            }
             {exportSettings && localVariableCollections.length &&
                 <div className="tab">
                     <h2>Exporting</h2>
 
                     <form onSubmit={(e) => e.preventDefault()}>
-                        <label htmlFor="">Variables</label>
+                        <label htmlFor="manage-variables-button" className="divider-label">
+                            <span>Variables</span>
+                        </label>
                         
                         <ul className="included-variables-list">
                             {getIncludedVariableRepresentations(includedVariables, localVariableCollections)
@@ -251,7 +272,9 @@ export default function ExportingTab({
                             setIsOpen={setVariableSelectorOpen}
                         />}
 
-                        <label htmlFor="add-scale-button">Scales</label>
+                        <label htmlFor="add-scale-button" className="divider-label">
+                            <span>Scales</span>
+                        </label>
 
                         {scales.map(scale => <ExportScaleSetting
                             scale={scale}
@@ -269,7 +292,36 @@ export default function ExportingTab({
                             <span>Add Scale</span>
                         </button>
 
-                        <hr />
+
+                        <label htmlFor="toggle-background-variant-checkbox" className="divider-label">
+                            <span>Background Variant</span>
+                        </label>
+
+                        <div className="checkbox background-variant-setting">
+                            <label htmlFor="toggle-background-variant-checkbox">Enable</label>
+                            <input
+                                type="checkbox"
+                                id="toggle-background-variant-checkbox"
+                                checked={enableBackgroundVariant}
+                                onChange={() => updateBackgroundVariant(!enableBackgroundVariant, backgroundVariantPassThrough)}
+                            />
+                        </div>
+
+                        <div className="checkbox background-variant-setting">
+                            <label htmlFor="background-variant-pass-through">Pass Through</label>
+                            <input
+                                id="background-variant-pass-through"
+                                type="number"
+                                value={backgroundVariantPassThrough}
+                                onChange={e => setBackgroundVariantPassThrough(Number(e.target.value))}
+                                onBlur={() => updateBackgroundVariant(enableBackgroundVariant, backgroundVariantPassThrough)}
+                                min="0"
+                                max="1"
+                                step="0.1"
+                            />
+                        </div>
+
+                        <label htmlFor="" className="divider-label"></label>
 
                         <button onClick={executeCompleteExport} id="complete-export-btn" type="submit">
                             Complete Export

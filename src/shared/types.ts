@@ -90,13 +90,19 @@ export type VariableExportSetting = {
 export type GlobalExportSettings = {
     includedVariables: VariableExportSetting;
     scales: ScaleExportSetting[];
+    backgroundVariant: BackgroundTemplateSetting;
 }
 
 export type UpdateGlobalExportSettings = {
     includesVariables?: VariableExportSetting;
     scales?: ScaleExportSetting[];
+    backgroundVariant?: BackgroundTemplateSetting;
 }
 
+export type BackgroundTemplateSetting = {
+    enabled: boolean;
+    passThrough: number;
+};
 
 
 type VariableResolvedDataType = 'BOOLEAN' | 'COLOR' | 'FLOAT' | 'STRING'

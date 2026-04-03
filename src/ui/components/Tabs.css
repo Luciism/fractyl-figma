@@ -1,14 +1,19 @@
 .tab-menu {
+  position: fixed;
+  top: 0;
+  z-index: 1;
+
   width: 100%;
-  height: 32px;
-  background-color: var(--accent-color);
-  /* border-bottom: 1px solid rgb(255 255 255 / 0.25); */
+  height: var(--tab-menu-height);
+
   padding-inline: 10px;
   padding-block: 10px 0px;
+
   display: flex;
   gap: 3px;
   overflow-x: scroll;
-  position: relative;
+
+  background-color: var(--accent-color);
 
   &::-webkit-scrollbar {
     width: 0px;
@@ -30,6 +35,11 @@
 
     &.active {
       background-color: var(--background-color);
+    }
+
+    &.debug:not(.active) {
+      /* background-color: var(--); */
+      opacity: 0.5;
     }
 
     &::after {

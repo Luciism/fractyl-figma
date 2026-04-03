@@ -4,13 +4,14 @@ import {
   StaticBaseSchema,
 } from "../../shared/schema-types.ts";
 import { ScaleExportSetting } from "../../shared/types.ts";
+import { getExportSettings } from "../exportSettings.ts";
 import { getNodeId } from "../ids.ts";
 import { isStyleableNode } from "../nodes.ts";
 import getTaggedNodes from "../tagging.ts";
 import { changeNodeFillOpacity } from "./color.ts";
 
 /** Requires rasterizeOpaque() to be called beforehand. */
-async function rasterizeTranslucent(clone: FrameNode, parentDir: string) {
+async function rasterizeTranslucent(clone: FrameNode, parentDir: string, passThrough: number) {
   // Recursively traverses frames to find the first one with a fill.
   // This sets the opacity of each tile
   const recursivelyUnfillBaseFrame = (node: SceneNode) => {
@@ -21,7 +22,7 @@ async function rasterizeTranslucent(clone: FrameNode, parentDir: string) {
       if (node.type == "FRAME") {
         // Ensure it isn't a layout frame
         if (typeof node.fills != "symbol" && node.fills.length) {
-          changeNodeFillOpacity(node, 0.8);
+          changeNodeFillOpacity(node, 1 - passThrough);
           return;
         }
 
@@ -182,20 +183,30 @@ export default async function exportRasterizedStaticElements(
     contentBox.rasterY = Math.round((clone.y - box.y) * scale.scale);
   }
 
+  const exportSettings = getExportSettings();
 
   const parentDir = scale.name;
   const opaque = await rasterizeOpaque(clone, parentDir);
-  const translucent = await rasterizeTranslucent(clone, parentDir);
+  let translucent = null;
+  let mask = null;
 
-  const clone2 = node.clone();
-  clone2.x = 0;
-  clone2.y = 10000;
-  const mask = await rasterizeMask(clone2, parentDir, scale);
+  if (exportSettings.backgroundVariant.enabled) {
+      translucent = await rasterizeTranslucent(clone, parentDir, exportSettings.backgroundVariant.passThrough);
+
+      const clone2 = node.clone();
+      clone2.x = 0;
+      clone2.y = 10000;
+      mask = await rasterizeMask(clone2, parentDir, scale);
+      clone2.remove();
+  }
 
   clone.remove();
-  clone2.remove();
 
-  const files = [opaque, translucent, mask];
+  const files = [opaque];
+  if (translucent && mask) {
+    files.push(translucent);
+    files.push(mask);
+  }
 
   return {
     schemas: {
@@ -204,10 +215,10 @@ export default async function exportRasterizedStaticElements(
       rasterSize,
       staticBase: {
         default: opaque.filename,
-        background: {
+        background: translucent && mask ? {
           translucent: translucent.filename,
           mask: mask.filename,
-        }
+        } : null
       },
     },
     files,
