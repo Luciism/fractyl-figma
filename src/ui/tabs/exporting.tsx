@@ -238,10 +238,10 @@ export default function ExportingTab({
 
     return (
         <>
-            {!exportSettings || !localVariableCollections.length &&
+            {!exportSettings || typeof localVariableCollections.length != "number" &&
                 <div className="tab">Loading...</div>
             }
-            {exportSettings && localVariableCollections.length &&
+            {exportSettings && typeof localVariableCollections.length == "number" &&
                 <div className="tab">
                     <h2>Exporting</h2>
 

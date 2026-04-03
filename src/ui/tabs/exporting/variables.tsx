@@ -19,10 +19,10 @@ function VariableSelection({
         <div
             key={variable.id}
             className={`
-                    variable-selection
-                    selection-input-wrapper
-                    ${isChecked || isEntireCollectionIncluded ? "included" : ""}
-                `}
+                variable-selection
+                selection-input-wrapper
+                ${isChecked || isEntireCollectionIncluded ? "included" : ""}
+            `}
         >
             <label htmlFor={`checkbox--${variable.id}`}>{variable.name}</label>
             <input
@@ -155,6 +155,9 @@ export default function VariableSelector({
                         setIncludedVariables={setAndUpdateIncludedVariables}
                     />;
                 })}
+                {
+                    !variableCollections.length && <p>No variables found</p>
+                }
             </div>
         </div>
     );
