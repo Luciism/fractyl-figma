@@ -1,8 +1,13 @@
-# Fractyl Figma
+# Fractyl Figma - BETA
 
 Fractyl is a pipeline for turning figma designs into SVG templates, exporting, and rendering them with actual data.
 
 For the fractyl renderer, see [Luciism/fractyl-rendererer](https://github.com/Luciism/fractyl-renderer.git).
+
+For video tutorials, see [the YouTube playlist](https://youtube.com/playlist?list=PLYPb34B-Nxqd5w8hc_918wX85iW4jU81t&si=tbhw7fr90tkI4Wmt) (may be out of date).
+
+This project is in BETA and may be rough around the edges. If you have any feedback, please open an [issue](https://github.com/Luciism/fractyl-figma/issues).
+
 
 ## Layouts
 
